@@ -2,7 +2,6 @@
 # Install LXD
 
 # Clone the infrastructure repository, this will be used to deploy CHAP Core lxd container
-./fetch-infrastructure.sh
 
 ./install-lxd.sh
 
