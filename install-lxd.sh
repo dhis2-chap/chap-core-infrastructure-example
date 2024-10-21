@@ -16,9 +16,9 @@ cat configs/lxd_preseed | sudo lxd init --preseed
 echo "LXD installation and initialization complete. Please log out and log back in for group changes to take effect."
 
 # Log out and log back in for group changes to take effect
-echo "Logging out..."
-gnome-session-quit --logout --no-prompt
+#echo "Logging out..."
+#gnome-session-quit --logout --no-prompt
 # Log back in
-gnome-session-quit --login
+#gnome-session-quit --login
 
 
