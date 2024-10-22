@@ -2,6 +2,7 @@
 # Install LXD
 
 # Clone the infrastructure repository, this will be used to deploy CHAP Core lxd container
+bash cd /home/ubuntu/chap-core
 
 bash ./install-lxd.sh
 
