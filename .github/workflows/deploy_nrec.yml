@@ -56,5 +56,4 @@ jobs:
   
       - name: Execute init.sh on remote server
         run: |
-          ssh ${{ secrets.SSH_USERNAME }} "ls -la"
           ssh ${{ secrets.SSH_USERNAME }} "bash /home/ubuntu/chap-core/init.sh"
