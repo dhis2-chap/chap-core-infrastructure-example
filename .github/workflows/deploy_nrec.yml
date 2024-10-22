@@ -50,7 +50,7 @@ jobs:
         # Step to change permissions on the remote server
       - name: Change directory permissions on remote server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod 775 /home/ubuntu/chap-core"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
         shell: bash
   
       - name: Execute init.sh on remote server
