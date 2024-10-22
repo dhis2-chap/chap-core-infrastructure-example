@@ -5,7 +5,7 @@ if sudo lxc list | grep -q "chap-container"; then
 fi
 
 sudo lxc launch ubuntu:20.04 chap-container
-
+sudo lxc config device add chap-container myport8080 proxy listen=tcp:0.0.0.0:8080 connect=tcp:127.0.0.1:8000
 # Wait for the container to initialize
 sleep 30 
 
