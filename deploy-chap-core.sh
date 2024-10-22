@@ -5,6 +5,7 @@ if sudo lxc list | grep -q "chap-container"; then
   sudo lxc delete chap-container --force
 fi
 
+sleep 10
 # Delete existing storage pool
 sudo lxc storage volume delete docker chap-container
 # Wait for the container to be deleted
