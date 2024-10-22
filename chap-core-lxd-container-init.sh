@@ -10,10 +10,11 @@ sh get-docker.sh
 rm get-docker.sh
 
 # Clone the chap-core repository
-git clone -b dev https://github.com/dhis2-chap/chap-core /chap-core
+git clone -b dev https://github.com/dhis2-chap/chap-core /opt/chap-core
 
 # Navigate to the chap-core directory
-cd /chap-core
+cd /opt/chap-core
 
 # Run Docker Compose
-docker-compose up -d
+docker compose up -d
+
