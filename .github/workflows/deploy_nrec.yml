@@ -22,6 +22,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
+      - name: Clone external repository
+        run: |
+          git clone https://github.com/dhis2-chap/infrastructure.git
+        shell: bash
+        
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: |
@@ -32,8 +37,9 @@ jobs:
           
       - name: Copy files to remote server
         run: |
-          scp -r . ${{ secrets.SSH_USERNAME }}:
+          scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/chap-core-from-github-actions
+        shell: bash
   
       - name: Execute init.sh on remote server
         run: |
-          ssh ${{ secrets.SSH_USERNAME }} "bash ./init.sh"
+          ssh ${{ secrets.SSH_USERNAME }} "bash ./chap-core-from-github-actions/init.sh"
