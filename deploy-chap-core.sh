@@ -5,9 +5,16 @@ if sudo lxc list | grep -q "chap-container"; then
   sudo lxc delete chap-container --force
 fi
 
+# Delete existing storage pool
+sudo lxc storage delete docker || true
+
 lxc storage create docker btrfs
 sudo lxc launch ubuntu:20.04 chap-container
 
+# Delete existing storage volume if it exists
+sudo lxc storage volume delete docker chap-container || true
+
+# Create new storage volume
 lxc storage volume create docker chap-container
 lxc config device add chap-container docker disk pool=docker source=chap-container path=/var/lib/docker
 lxc config set chap-container security.nesting=true security.syscalls.intercept.mknod=true security.syscalls.intercept.setxattr=true
