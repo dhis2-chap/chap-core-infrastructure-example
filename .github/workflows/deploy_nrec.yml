@@ -34,10 +34,23 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+      # Delete the folder
+      - name: Delete the existing folder
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "rm -rf /home/ubuntu/chap-core"
+        shell: bash
+  
           
       - name: Copy files to remote server
         run: |
           scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
+        shell: bash
+
+        # Step to change permissions on the remote server
+      - name: Change directory permissions on remote server
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod 775 ./home/ubuntu/chap-core"
         shell: bash
   
       - name: Execute init.sh on remote server
