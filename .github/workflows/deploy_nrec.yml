@@ -50,7 +50,6 @@ jobs:
         # Step to change permissions on the remote server
       - name: Change directory permissions on remote server
         run: |
-          sleep 30
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
         shell: bash
   

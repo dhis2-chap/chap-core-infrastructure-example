@@ -3,6 +3,6 @@
 
 # Clone the infrastructure repository, this will be used to deploy CHAP Core lxd container
 
-./install-lxd.sh
+bash ./install-lxd.sh
 
-./deploy-chap-core.sh
+bash ./deploy-chap-core.sh
