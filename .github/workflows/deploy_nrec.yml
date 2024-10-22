@@ -24,7 +24,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
-        run: 
+        run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
