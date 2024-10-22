@@ -1,4 +1,9 @@
 
+# Check if the container exists and delete it if it does
+if sudo lxc list | grep -q "chap-container"; then
+  sudo lxc delete chap-container --force
+fi
+
 sudo lxc launch ubuntu:20.04 chap-container
 
 # Wait for the container to initialize
