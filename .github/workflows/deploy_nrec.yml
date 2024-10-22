@@ -44,6 +44,7 @@ jobs:
           
       - name: Copy files to remote server
         run: |
+          sleep 30
           scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
         shell: bash
 
