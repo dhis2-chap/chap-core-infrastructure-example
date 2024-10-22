@@ -6,13 +6,20 @@ if sudo lxc list | grep -q "chap-container"; then
 fi
 
 # Delete existing storage pool
-sudo lxc storage delete docker || true
+sudo lxc storage volume delete docker chap-container
+# Wait for the container to be deleted
+sleep 10
+# Delete the storage pool
+sudo lxc storage delete docker
+
+# Wait for the storage pool to be deleted
+sleep 1+
 
 lxc storage create docker btrfs
 sudo lxc launch ubuntu:20.04 chap-container
 
 # Delete existing storage volume if it exists
-sudo lxc storage volume delete docker chap-container || true
+
 
 # Create new storage volume
 lxc storage volume create docker chap-container
