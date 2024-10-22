@@ -55,4 +55,5 @@ jobs:
   
       - name: Execute init.sh on remote server
         run: |
-          ssh ${{ secrets.SSH_USERNAME }} "bash /home/ubuntu/chap-core/init.sh"
+          ssh ${{ secrets.SSH_USERNAME }} "cd /home/ubuntu/chap-core"
+          ssh ${{ secrets.SSH_USERNAME }} "bash init.sh"
