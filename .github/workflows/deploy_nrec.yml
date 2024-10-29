@@ -61,14 +61,14 @@ jobs:
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
         shell: bash
 
-      - name: Set environment variable on remote server
+      - name: Set environment variables and run commands on remote server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "export GOOGLE_SERVICE_ACCOUNT_EMAIL='${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}'"
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY='${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}'"
+          ssh-agent bash -c "ssh-add ~/.ssh/id_rsa; ssh ${{ secrets.SSH_USERNAME }}@$REMOTE_SERVER '
+            export GOOGLE_SERVICE_ACCOUNT_EMAIL=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}\"
+            export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}\"
+            bash /home/ubuntu/chap-core/init.sh
+          '"
+        env:
+          REMOTE_SERVER: ${{ secrets.REMOTE_SERVER }}
         shell: bash
-  
-      - name: Install LXD and start CHAP core on remote server
-        run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "echo $GOOGLE_SERVICE_ACCOUNT_EMAIL"
-        #ssh ${{ secrets.SSH_USERNAME }} "bash /home/ubuntu/chap-core/init.sh"
-        shell: bash
+
