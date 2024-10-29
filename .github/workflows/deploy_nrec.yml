@@ -22,6 +22,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
+      - name: Remove all keys belonging to hostname from a known_hosts file
+        run: |
+          ssh-keygen -R ${{ secrets.HOST }}
+        shell: bash
+
+
       - name: Clone external repository
         run: |
           git clone https://github.com/dhis2-chap/infrastructure.git
@@ -30,7 +36,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: Write the SSH key to a file on GitHub Actions
         run: |
-          ssh-keygen -R ${{ secrets.HOST }}
+          
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
