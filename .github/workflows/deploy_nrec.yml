@@ -63,13 +63,11 @@ jobs:
 
       - name: Set environment variables and run commands on remote server
         run: |
-          ssh -i ~/.ssh/id_rsa ${REMOTE_SERVER} "
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "
             export GOOGLE_SERVICE_ACCOUNT_EMAIL=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}\"
             export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}\"
             bash /home/ubuntu/chap-core/init.sh
           "
-        env:
-          REMOTE_SERVER: "${{ secrets.SSH_USERNAME }}@${{ secrets.HOST }}"
         shell: bash
 
 
