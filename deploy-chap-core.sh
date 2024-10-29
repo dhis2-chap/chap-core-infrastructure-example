@@ -27,7 +27,7 @@ lxc config set chap-container security.nesting=true security.syscalls.intercept.
 
 lxc restart chap-container
 
-sudo lxc config device add chap-container chapPort8080 proxy listen=tcp:0.0.0.0:8080 connect=tcp:127.0.0.1:8000
+sudo lxc config device add chap-container chapPort80 proxy listen=tcp:0.0.0.0:80 connect=tcp:127.0.0.1:8000
 
 # Wait for the container to initialize
 sleep 30 
