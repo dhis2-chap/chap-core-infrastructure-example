@@ -15,7 +15,7 @@ sudo lxc storage delete docker
 
 sleep 10
 
-lxc storage create docker btrfs
+lxc storage create docker btrfs size=100GB
 sudo lxc launch ubuntu:24.04 chap-container
 
 # Delete existing storage volume if it exists
