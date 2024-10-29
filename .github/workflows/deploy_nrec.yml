@@ -70,3 +70,4 @@ jobs:
       - name: Install LXD and start CHAP core on remote server
         run: |
           ssh ${{ secrets.SSH_USERNAME }} "bash /home/ubuntu/chap-core/init.sh"
+        shell: bash
