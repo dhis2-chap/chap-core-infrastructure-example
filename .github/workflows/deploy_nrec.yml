@@ -53,6 +53,12 @@ jobs:
           sleep 10
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
         shell: bash
+
+      - name: Set environment variable on remote server
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "echo 'export GOOGLE_SERVICE_ACCOUNT_EMAIL=${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}' >> ~/.bashrc"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "echo 'export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}' >> ~/.bashrc"
+        shell: bash
   
       - name: Execute init.sh on remote server
         run: |
