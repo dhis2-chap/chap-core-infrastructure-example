@@ -15,7 +15,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    name: Deploy to NREC
+    name: Deploy CHAP core to NREC
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -30,7 +30,7 @@ jobs:
         shell: bash
 
 
-      - name: Clone external repository
+      - name: Clone CHAP Core repo
         run: |
           git clone https://github.com/dhis2-chap/infrastructure.git
         shell: bash
@@ -44,12 +44,11 @@ jobs:
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
       # Delete the folder
-      - name: Delete the existing folder
+      - name: Delete existing folder at remote server
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "rm -rf /home/ubuntu/chap-core"
         shell: bash
   
-          
       - name: Copy files to remote server
         run: |
           scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
@@ -68,6 +67,6 @@ jobs:
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY='${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}'"
         shell: bash
   
-      - name: Execute init.sh on remote server
+      - name: Install LXD and start CHAP core on remote server
         run: |
           ssh ${{ secrets.SSH_USERNAME }} "bash /home/ubuntu/chap-core/init.sh"
