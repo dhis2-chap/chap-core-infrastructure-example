@@ -69,6 +69,6 @@ jobs:
             bash /home/ubuntu/chap-core/init.sh
           '"
         env:
-          REMOTE_SERVER: ${{ secrets.REMOTE_SERVER }}
+          REMOTE_SERVER: ${{ secrets.HOST }}
         shell: bash
 
