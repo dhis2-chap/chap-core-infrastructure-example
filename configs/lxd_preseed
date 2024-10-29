@@ -9,9 +9,9 @@ networks:
   type: "bridge"
 storage_pools:
 - config: {}
-  description: ""
-  name: default
-  driver: dir
+    source: /home/ubuntu/lxd-storage
+    volatile.initial_source: /home/ubuntu/lxd-storage
+    zfs.pool_name: /home/ubuntu/lxd-storage
 profiles:
 - config: {}
   description: ""
