@@ -8,7 +8,7 @@ networks:
   name: lxdbr0
   type: "bridge"
 storage_pools:
-- config: {}
+- config:
     source: /home/ubuntu/lxd-storage
     volatile.initial_source: /home/ubuntu/lxd-storage
     zfs.pool_name: /home/ubuntu/lxd-storage
