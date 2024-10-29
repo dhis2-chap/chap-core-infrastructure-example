@@ -56,8 +56,8 @@ jobs:
 
       - name: Set environment variable on remote server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "export GOOGLE_SERVICE_ACCOUNT_EMAIL=${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}"
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "export GOOGLE_SERVICE_ACCOUNT_EMAIL = ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY = ${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}"
         shell: bash
   
       - name: Execute init.sh on remote server
