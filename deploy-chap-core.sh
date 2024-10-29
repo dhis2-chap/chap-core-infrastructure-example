@@ -26,8 +26,8 @@ lxc config device add chap-core docker disk pool=docker source=chap-core path=/v
 lxc config set chap-core security.nesting=true security.syscalls.intercept.mknod=true security.syscalls.intercept.setxattr=true
 
 # set environment variables
-lxc config set chap-core environment.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY $GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
-lxc config set chap-core environment.GOOGLE_SERVICE_ACCOUNT_EMAIL $GOOGLE_SERVICE_ACCOUNT_EMAIL
+lxc config set chap-core environment.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY "$GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"
+lxc config set chap-core environment.GOOGLE_SERVICE_ACCOUNT_EMAIL "$GOOGLE_SERVICE_ACCOUNT_EMAIL"
 lxc exec chap-core -- env
 
 lxc restart chap-core

@@ -1,6 +1,4 @@
 #!/bin/bash
-echo "The  key is: $GOOGLE_SERVICE_ACCOUNT_EMAIL"
-
 #This file will first install LXD on the machine, before launching CHAP Core
 # Install LXD
 
