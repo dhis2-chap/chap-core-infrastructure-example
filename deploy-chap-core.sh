@@ -5,6 +5,9 @@ if sudo lxc list | grep -q "chap-container"; then
   sudo lxc delete chap-container --force
 fi
 
+## deleting existing iptables rules
+sudo iptables -F
+
 sleep 10
 # Delete existing storage pool
 sudo lxc storage volume delete docker chap-container
@@ -27,7 +30,7 @@ lxc config set chap-container security.nesting=true security.syscalls.intercept.
 
 lxc restart chap-container
 
-sudo lxc config device add chap-container chapPort80 proxy listen=tcp:0.0.0.0:80 connect=tcp:127.0.0.1:8000
+sudo lxc config device add chap-container chapPort443 proxy listen=tcp:0.0.0.0:443 connect=tcp:127.0.0.1:8000
 
 # Wait for the container to initialize
 sleep 30 
@@ -40,3 +43,5 @@ sudo lxc exec chap-container -- chmod +x /root/chap-core-lxd-container-init.sh
 
 # Run the initialization script within the container
 sudo lxc exec chap-container -- /root/chap-core-lxd-container-init.sh
+
+# Wait for the container to initialize
