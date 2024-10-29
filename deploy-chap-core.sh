@@ -15,19 +15,20 @@ sleep 10
 sudo lxc storage delete docker
 sleep 10
 
-lxc storage create docker btrfs size=50GB source=/home/ubuntu/lxd-storage
-sudo lxc launch ubuntu:24.04 chap-core
+lxc storage create docker btrfs size=50GB source=/home/ubuntu/lxd-storage || true
+sudo lxc launch ubuntu:24.04 chap-core || true
 
 # Delete existing storage volume if it exists
 
 # Create new storage volume
-lxc storage volume create docker chap-core size=50GB source=/home/ubuntu/lxd-storage
+lxc storage volume create docker chap-core size=50GB source=/home/ubuntu/lxd-storage 
 lxc config device add chap-core docker disk pool=docker source=chap-core path=/var/lib/docker
 lxc config set chap-core security.nesting=true security.syscalls.intercept.mknod=true security.syscalls.intercept.setxattr=true
 
 # set environment variables
 lxc config set chap-core environment.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY $GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
 lxc config set chap-core environment.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY $GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+lxc exec ubuntu -- env
 
 lxc restart chap-core
 
