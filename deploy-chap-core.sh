@@ -21,7 +21,7 @@ sudo lxc launch ubuntu:24.04 chap-container
 # Delete existing storage volume if it exists
 
 # Create new storage volume
-lxc storage volume create docker chap-container
+lxc storage volume create docker chap-container size=100GB
 lxc config device add chap-container docker disk pool=docker source=chap-container path=/var/lib/docker
 lxc config set chap-container security.nesting=true security.syscalls.intercept.mknod=true security.syscalls.intercept.setxattr=true
 
