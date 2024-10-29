@@ -8,6 +8,7 @@ fi
 # Delete existing storage pool
 sudo lxc storage volume delete docker chap-core
 # Wait for the container to be deleted
+sleep 10
 # Delete the storage pool
 sudo lxc storage delete docker
 sleep 10
