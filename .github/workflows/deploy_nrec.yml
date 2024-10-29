@@ -14,6 +14,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
+  name: Deploy to NREC
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -24,7 +25,7 @@ jobs:
 
       - name: Remove all keys belonging to hostname from a known_hosts file
         run: |
-          ssh-keygen -R ${{ secrets.HOST }}
+          ssh-keygen -R ${{ secrets.HOST }} || true
         shell: bash
 
 
@@ -35,8 +36,7 @@ jobs:
         
       # Runs a single command using the runners shell
       - name: Write the SSH key to a file on GitHub Actions
-        run: |
-          
+        run: | 
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
