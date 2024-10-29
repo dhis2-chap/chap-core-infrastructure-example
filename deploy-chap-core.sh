@@ -5,6 +5,7 @@ if sudo lxc list | grep -q "chap-core"; then
   sudo lxc delete chap-core --force
 fi
 
+sleep 10
 # Delete existing storage pool
 sudo lxc storage volume delete docker chap-core
 # Wait for the container to be deleted
@@ -31,6 +32,9 @@ lxc config set chap-core environment.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY $GOOGLE_
 lxc restart chap-core
 
 sudo lxc config device add chap-core chapPort443 proxy listen=tcp:0.0.0.0:443 connect=tcp:127.0.0.1:8000
+
+# Wait for the container to initialize
+sleep 30 
 
 # Upload the initialization script to the container
 sudo lxc file push chap-core-lxd-container-init.sh chap-core/root/
