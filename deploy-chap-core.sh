@@ -21,8 +21,6 @@ lxc storage create docker btrfs size=90GB
 sleep 10
 sudo lxc launch ubuntu:24.04 chap-core
 
-# Delete existing storage volume if it exists
-
 # Create new storage volume
 lxc storage volume create docker chap-core size=90GB
 lxc config device add chap-core docker disk pool=docker source=chap-core path=/var/lib/docker

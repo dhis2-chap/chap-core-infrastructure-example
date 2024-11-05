@@ -1,7 +1,9 @@
 # Deploy CHAP
-This repository is an example of how CHAP Core infrastructure and code could be deployed to a server using Docker inside LXC/LXD.
+**This repository is an example of how CHAP Core infrastructure and code could be deployed to a server running Docker inside a LXC/LXD container.**
 
-General CHAP documentation: [https://dhis2-chap.github.io/chap-core/](https://dhis2-chap.github.io/chap-core/)
+To be able to run CHAP Core correctly, it requires you to have access to Google Earth Engine credentials and provide these to CHAP Core. You can read more about DHIS2 and Google Earth Engine [here](https://docs.dhis2.org/en/topics/tutorials/google-earth-engine-sign-up.html) If you do not have access to these credentials, you can start CHAP Core, but it will not be able to give you any predictions or evaluations.
+ 
+General CHAP documentation could be fond at: [https://dhis2-chap.github.io/chap-core/](https://dhis2-chap.github.io/chap-core/)
 
 ### Central files in this repository:
 - [GitHub action](.github/workflows/deploy_nrec.yml)
