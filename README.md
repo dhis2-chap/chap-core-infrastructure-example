@@ -3,8 +3,6 @@ This repository is an example of how CHAP Core infrastructure and code could be 
 
 General CHAP documentation: [https://dhis2-chap.github.io/chap-core/](https://dhis2-chap.github.io/chap-core/)
 
-**NB!** In this repository, you might find that CHAP Core is exposed on a port to the rest of the internet. This is not a recommended approach since it allows everyone to connect to CHAP Core. The recommended approach is instead to expose CHAP Core only on the server, and make it available for DHIS2.
-
 ### Central files in this repository:
 - [GitHub action](.github/workflows/deploy_nrec.yml)
 - [Deployment](./init.sh)
