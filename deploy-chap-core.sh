@@ -3,25 +3,28 @@
 if sudo lxc list | grep -q "chap-core"; then
   echo "Deleting existing container..."
   sudo lxc delete chap-core --force
+  sleep 20
 fi
+  echo "No container found..."
 
 
-sleep 20
-# Delete existing storage pool
-sudo lxc storage volume delete docker chap-core
-# Wait for the container to be deleted
-sleep 10
-# Delete the storage pool
+# Delete existing storage
 sudo lxc storage delete docker
 sleep 10
 
-lxc storage create docker btrfs size=50GB source=/home/ubuntu/lxd-storage || true
-sudo lxc launch ubuntu:24.04 chap-core || true
+# Delete the storage pool
+sudo lxc storage volume delete docker chap-core
+sleep 10
+
+
+lxc storage create docker btrfs size=90GB
+sleep 10
+sudo lxc launch ubuntu:24.04 chap-core
 
 # Delete existing storage volume if it exists
 
 # Create new storage volume
-lxc storage volume create docker chap-core size=50GB source=/home/ubuntu/lxd-storage 
+lxc storage volume create docker chap-core size=90GB
 lxc config device add chap-core docker disk pool=docker source=chap-core path=/var/lib/docker
 lxc config set chap-core security.nesting=true security.syscalls.intercept.mknod=true security.syscalls.intercept.setxattr=true
 
