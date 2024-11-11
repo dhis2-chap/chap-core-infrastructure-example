@@ -39,7 +39,7 @@ jobs:
       - name: Write the SSH key to a file on GitHub Actions
         run: | 
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY2 }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
@@ -69,5 +69,6 @@ jobs:
             bash /home/ubuntu/chap-core/init.sh
           "
         shell: bash
+
 
 
