@@ -16,7 +16,7 @@ General CHAP documentation could be fond at: [https://dhis2-chap.github.io/chap-
 
 ## Verify installation:
 
-On your server, use your terminal and execute:
+You need to verify that CHAP Core is accessible from outside the CHAP Core container. On your VM operating system execute:
 
 ```sh
   curl http://localhost:8000/list-models
