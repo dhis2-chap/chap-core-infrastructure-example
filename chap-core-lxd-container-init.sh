@@ -22,7 +22,7 @@ sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
 # Clone the chap-core repository
-git clone -b dev https://github.com/dhis2-chap/chap-core /root/chap-core
+git clone https://github.com/dhis2-chap/chap-core /root/chap-core
 
 # Navigate to the chap-core directory
 cd /root/chap-core
