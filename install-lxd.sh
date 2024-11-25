@@ -13,10 +13,4 @@ sudo usermod -aG lxd $USER
 # Initialize LXD
 cat configs/lxd_preseed | sudo lxd init --preseed
 
-# Log out and log back in for group changes to take effect
-#echo "Logging out..."
-#gnome-session-quit --logout --no-prompt
-# Log back in
-#gnome-session-quit --login
-
 
