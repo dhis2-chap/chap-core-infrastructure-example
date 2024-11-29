@@ -56,10 +56,10 @@ jobs:
         run: |
           ssh-keygen -R ${{ secrets.HOST }} || true
         shell: bash
-      #- name: Clone CHAP Core repo
-      #  run: |
-      #    git clone https://github.com/dhis2-chap/infrastructure.git
-      #  shell: bash
+      - name: Clone CHAP Core repo
+        run: |
+          git clone https://github.com/dhis2-chap/infrastructure.git
+        shell: bash
         
       # Runs a single command using the runners shell
       - name: Write the SSH key to a file on GitHub Actions
