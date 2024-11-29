@@ -24,22 +24,7 @@ jobs:
           sudo apt  install python3-openstackclient
         shell: bash
         #This rebuilds the instance using OpenStack CLI
-#   - name: Rebuild CHAP instance
-#     run: |
-#       export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
-#       export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
-#       export OS_PASSWORD=${{ secrets.OPENSTACK_PASSWORD }}
-#       export OS_AUTH_URL=https://api.nrec.no:5000/v3
-#       export OS_IDENTITY_API_VERSION=3
-#       export OS_USER_DOMAIN_NAME=dataporten
-#       export OS_PROJECT_DOMAIN_NAME=dataporten
-#       export OS_REGION_NAME=osl
-#       export OS_INTERFACE=public
-#       export OS_NO_CACHE=1
-#       
-#       openstack server rebuild --wait --image 97397a31-2517-4eb8-b66f-1d50c00dbb77 chap
-#     shell: bash
-      - name: Create keyPair
+      - name: Rebuild CHAP instance
         run: |
           export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
           export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
@@ -51,12 +36,27 @@ jobs:
           export OS_REGION_NAME=osl
           export OS_INTERFACE=public
           export OS_NO_CACHE=1
-
-          openstack keypair create --private-key nrec.pem chap-key
-          chmod 0600 nrec.pem
-          ssh -i nrec.pem ubuntu@${{ secrets.HOST }} "echo 'Hello, world!'"
-
+          
+          openstack server rebuild --wait --image 97397a31-2517-4eb8-b66f-1d50c00dbb77 chap
         shell: bash
+#      - name: Create keyPair
+#        run: |
+#          export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
+#          export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
+#          export OS_PASSWORD=${{ secrets.OPENSTACK_PASSWORD }}
+#          export OS_AUTH_URL=https://api.nrec.no:5000/v3
+#          export OS_IDENTITY_API_VERSION=3
+#          export OS_USER_DOMAIN_NAME=dataporten
+#          export OS_PROJECT_DOMAIN_NAME=dataporten
+#          export OS_REGION_NAME=osl
+#          export OS_INTERFACE=public
+#          export OS_NO_CACHE=1#
+
+#          openstack keypair create --private-key nrec.pem chap-key
+#          chmod 0600 nrec.pem
+#          ssh -i nrec.pem ubuntu@${{ secrets.HOST }} "echo 'Hello, world!'"#
+
+#        shell: bash
 
 
 
@@ -78,27 +78,27 @@ jobs:
           git clone https://github.com/dhis2-chap/chap-core-infrastructure-example.git infrastructure
         shell: bash
       # Runs a single command using the runners shell
-     # - name: Write the SSH key to a file on GitHub Actions
-     #   run: | 
-     #       set -e
-     #       mkdir -p ~/.ssh
-     #       ssh_key="${{ secrets.SSH_PRIVATE_KEY }}"
-     #       echo "${ssh_key}" > ~/.ssh/id_rsa
-     #       chmod 700 ~/.ssh/id_rsa
-     #   shell: bash
-     # - name: Scan host keys for host
-     #   run: |
-     #       host="${{ secrets.HOST }}"
-     #       for i in {1..5}; do
-     #         echo "Attempting to scan host keys for ${host}, try #${i}"
-     #         ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
-     #         echo "Scan failed, retrying after 5s"
-     #         sleep 5
-     #       done || {
-     #         echo "Failed to scan host keys for ${host} after 5 attempts"
-     #         exit 1
-     #       }
-     #   shell: bash
+      - name: Write the SSH key to a file on GitHub Actions
+        run: | 
+            set -e
+            mkdir -p ~/.ssh
+            ssh_key="${{ secrets.SSH_PRIVATE_KEY }}"
+            echo "${ssh_key}" > ~/.ssh/id_rsa
+            chmod 700 ~/.ssh/id_rsa
+        shell: bash
+      - name: Scan host keys for host
+        run: |
+            host="${{ secrets.HOST }}"
+            for i in {1..5}; do
+              echo "Attempting to scan host keys for ${host}, try #${i}"
+              ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
+              echo "Scan failed, retrying after 5s"
+              sleep 5
+            done || {
+              echo "Failed to scan host keys for ${host} after 5 attempts"
+              exit 1
+            }
+        shell: bash
    #   - name: multiple command
    #     uses: appleboy/ssh-action@v1.2.0
    #     with:
