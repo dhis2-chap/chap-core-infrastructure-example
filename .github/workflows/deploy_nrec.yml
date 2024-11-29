@@ -36,11 +36,13 @@ jobs:
           export OS_REGION_NAME=osl
           export OS_INTERFACE=public
           export OS_NO_CACHE=1
-        shell: bash
-      - name: Reset instance
-        run: |
+
           openstack server list 
         shell: bash
+     # - name: Reset instance
+     #   run: |
+     #     openstack server list 
+     #   shell: bash
 
 #openstack server rebuild --wait --image 1b3b3b3b-3b3b-3b3b-3b3b-3b3b3b3b3b3b chap-core
 
