@@ -14,37 +14,37 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  resetInstance:
-    name: Reset CHAP core instance on NREC
-    runs-on: ubuntu-latest
-    steps:
-        #Install OpenStack CLI
-      - name: Install OpenStack CLI
-        run: |
-          sudo apt-get update
-          sudo snap install openstackclients
-          sudo apt  install python3-openstackclient
-        shell: bash
+  #resetInstance:
+  #  name: Reset CHAP core instance on NREC
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #      #Install OpenStack CLI
+  #    - name: Install OpenStack CLI
+  #      run: |
+  #        sudo apt-get update
+  #        sudo snap install openstackclients
+  #        sudo apt  install python3-openstackclient
+  #      shell: bash
 
-        #This rebuilds the instance using OpenStack CLI
-      - name: Rebuild CHAP instance
-        run: |
-          export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
-          export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
-          export OS_PASSWORD=${{ secrets.OPENSTACK_PASSWORD }}
-          export OS_AUTH_URL=https://api.nrec.no:5000/v3
-          export OS_IDENTITY_API_VERSION=3
-          export OS_USER_DOMAIN_NAME=dataporten
-          export OS_PROJECT_DOMAIN_NAME=dataporten
-          export OS_REGION_NAME=osl
-          export OS_INTERFACE=public
-          export OS_NO_CACHE=1
-          
-          openstack server rebuild --wait --image 97397a31-2517-4eb8-b66f-1d50c00dbb77 chap
-        shell: bash
+  #      #This rebuilds the instance using OpenStack CLI
+  #    - name: Rebuild CHAP instance
+  #      run: |
+  #        export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
+  #        export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
+  #        export OS_PASSWORD=${{ secrets.OPENSTACK_PASSWORD }}
+  #        export OS_AUTH_URL=https://api.nrec.no:5000/v3
+  #        export OS_IDENTITY_API_VERSION=3
+  #        export OS_USER_DOMAIN_NAME=dataporten
+  #        export OS_PROJECT_DOMAIN_NAME=dataporten
+  #        export OS_REGION_NAME=osl
+  #        export OS_INTERFACE=public
+  #        export OS_NO_CACHE=1
+  #        
+  #        openstack server rebuild --wait --image 97397a31-2517-4eb8-b66f-1d50c00dbb77 chap
+  #      shell: bash
       
   deployChap:
-    needs: resetInstance
+    #needs: resetInstance
     name: Deploy CHAP core to instance on NREC
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -64,8 +64,8 @@ jobs:
         run: | 
           sleep 4
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 0600 ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > nrec.pem
+          chmod 0600 nrec.pem
         # - name: Scan host keys for host
      # - name: Attempting to scan host keys for
      #   run: |
@@ -84,17 +84,17 @@ jobs:
         #Copty the infrastructure folder to the remote server
       - name: Copy files to remote server
         run: |
-          scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
+          scp -i nrec.pem -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
         shell: bash
         # Step to change permissions on the remote server
       - name: Change directory permissions on remote server
         run: |
           sleep 4
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
+          ssh -i nrec.pem ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
         shell: bash
       - name: Set environment variables and run commands on remote server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "
+          ssh -i nrec.pem ${{ secrets.SSH_USERNAME }} "
             export GOOGLE_SERVICE_ACCOUNT_EMAIL=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}\"
             export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}\"
             bash /home/ubuntu/chap-core/init.sh
