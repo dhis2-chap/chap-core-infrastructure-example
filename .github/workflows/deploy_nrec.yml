@@ -56,16 +56,16 @@ jobs:
         run: |
           ssh-keygen -R ${{ secrets.HOST }} || true
         shell: bash
-      - name: Clone CHAP Core repo
-        run: |
-          git clone https://github.com/dhis2-chap/infrastructure.git
-        shell: bash
+      #- name: Clone CHAP Core repo
+      #  run: |
+      #    git clone https://github.com/dhis2-chap/infrastructure.git
+      #  shell: bash
         
       # Runs a single command using the runners shell
       - name: Write the SSH key to a file on GitHub Actions
         run: | 
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY2 }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
       # Delete the folder  
