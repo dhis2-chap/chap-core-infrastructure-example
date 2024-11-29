@@ -1,22 +1,4 @@
 
-# Check if the container exists and delete it if it does
-if sudo lxc list | grep -q "chap-core"; then
-  echo "Deleting existing container..."
-  sudo lxc delete chap-core --force
-  sleep 20
-fi
-  echo "No container found..."
-
-
-# Delete existing storage
-sudo lxc storage delete docker
-sleep 10
-
-# Delete the storage pool
-sudo lxc storage volume delete docker chap-core
-sleep 10
-
-
 lxc storage create docker btrfs size=90GB
 sleep 10
 sudo lxc launch ubuntu:24.04 chap-core
@@ -37,7 +19,7 @@ lxc restart chap-core
 sudo lxc config device add chap-core chapPort443 proxy listen=tcp:0.0.0.0:443 connect=tcp:127.0.0.1:8000
 
 # Wait for the container to initialize
-sleep 30 
+sleep 30
 
 # Upload the initialization script to the container
 sudo lxc file push chap-core-lxd-container-init.sh chap-core/root/
@@ -47,5 +29,3 @@ sudo lxc exec chap-core -- chmod +x /root/chap-core-lxd-container-init.sh
 
 # Run the initialization script within the container
 sudo lxc exec chap-core -- /root/chap-core-lxd-container-init.sh
-
-# Wait for the container to initialize
