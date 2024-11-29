@@ -27,7 +27,7 @@ jobs:
         shell: bash
 
         #This rebuilds the instance using OpenStack CLI
-      - name: Reset instance
+      - name: Rebuild CHAP instance
         run: |
           export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
           export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
@@ -62,16 +62,20 @@ jobs:
       # Runs a single command using the runners shell
       - name: Write the SSH key to a file on GitHub Actions
         run: | 
-          sleep 10
+          sleep 4
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-
+        #Copty the infrastructure folder to the remote server
+      - name: Copy files to remote server
+        run: |
+          scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
+        shell: bash
         # Step to change permissions on the remote server
       - name: Change directory permissions on remote server
         run: |
-          sleep 10
+          sleep 4
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
         shell: bash
       - name: Set environment variables and run commands on remote server
