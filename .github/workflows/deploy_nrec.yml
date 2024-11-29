@@ -64,7 +64,10 @@ jobs:
             ssh_key="${{ secrets.SSH_PRIVATE_KEY }}"
             echo "${ssh_key}" > ~/.ssh/id_rsa
             chmod 600 ~/.ssh/id_rsa
-            sleep 4
+                        
+        shell: bash
+      - name: Scan host keys for host
+        run: |
             host="${{ secrets.HOST }}"       
             ssh-keyscan -H "${host}" >> ~/.ssh/known_hosts || {
               echo "Failed to scan host keys for ${host}"
