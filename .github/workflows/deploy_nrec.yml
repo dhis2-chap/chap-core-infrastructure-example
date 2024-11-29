@@ -57,7 +57,7 @@ jobs:
         shell: bash
       - name: Clone CHAP Core repo
         run: |
-          git clone https://github.com/dhis2-chap/chap-core-infrastructure-example.git
+          git clone https://github.com/dhis2-chap/chap-core-infrastructure-example.git infrastructure/
         shell: bash
       # Runs a single command using the runners shell
       - name: Write the SSH key to a file on GitHub Actions
