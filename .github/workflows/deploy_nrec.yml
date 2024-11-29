@@ -14,7 +14,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   resetInstance:
-    name: Reset CHAP core instance
+    name: Reset CHAP core instance on NREC
     runs-on: ubuntu-latest
     steps:
       - name: Install OpenStack CLI
@@ -36,8 +36,7 @@ jobs:
           export OS_REGION_NAME=osl
           export OS_INTERFACE=public
           export OS_NO_CACHE=1
-
-          openstack server list 
+          
           openstack server rebuild --wait --image 97397a31-2517-4eb8-b66f-1d50c00dbb77 chap
         shell: bash
 
@@ -45,7 +44,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     needs: resetInstance
-    name: Deploy CHAP core to NREC
+    name: Deploy CHAP core to instance on NREC
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -69,12 +68,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY2 }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-      # Delete the folder
-      - name: Delete existing folder at remote server
-        run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "rm -rf /home/ubuntu/chap-core"
-        shell: bash
-  
+      # Delete the folder  
       - name: Copy files to remote server
         run: |
           scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
