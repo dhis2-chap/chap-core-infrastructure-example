@@ -60,18 +60,9 @@ jobs:
         run: | 
             mkdir -p ~/.ssh
             ssh_key="${{ secrets.SSH_PRIVATE_KEY }}"
-            if [[ -z "${ssh_key// }" ]]; then
-              echo "SSH key is not set or empty."
-              exit 1
-            fi
             echo "${ssh_key}" > ~/.ssh/id_rsa
             chmod 600 ~/.ssh/id_rsa
-            
-            host="${{ secrets.HOST }}"
-            if [[ -z "${host// }" ]]; then
-              echo "Host is not set or empty."
-              exit 1
-            fi
+            host="${{ secrets.HOST }}"       
             ssh-keyscan -H "${host}" >> ~/.ssh/known_hosts || {
               echo "Failed to scan host keys for ${host}"
               exit 1
