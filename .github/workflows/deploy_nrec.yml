@@ -24,7 +24,7 @@ jobs:
           sudo apt  install python3-openstackclient
         shell: bash
 
-      - name: Add OpenStack credentials
+      - name: Reset instance
         run: |
           export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
           export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
@@ -38,6 +38,7 @@ jobs:
           export OS_NO_CACHE=1
 
           openstack server list 
+          openstack server rebuild --wait --image 97397a31-2517-4eb8-b66f-1d50c00dbb77 chap
         shell: bash
      # - name: Reset instance
      #   run: |
