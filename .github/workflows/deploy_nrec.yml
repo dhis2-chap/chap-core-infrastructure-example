@@ -14,47 +14,47 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  #resetInstance:
-  #  name: Reset CHAP core instance on NREC
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #      #Install OpenStack CLI
-  #    - name: Install OpenStack CLI
-  #      run: |
-  #        sudo apt-get update
-  #        sudo snap install openstackclients
-  #        sudo apt  install python3-openstackclient
-  #      shell: bash
+  resetInstance:
+    name: Reset CHAP core instance on NREC
+    runs-on: ubuntu-latest
+    steps:
+        #Install OpenStack CLI
+      - name: Install OpenStack CLI
+        run: |
+          sudo apt-get update
+          sudo snap install openstackclients
+          sudo apt  install python3-openstackclient
+        shell: bash
 
-  #      #This rebuilds the instance using OpenStack CLI
-  #    - name: Rebuild CHAP instance
-  #      run: |
-  #        export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
-  #        export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
-  #        export OS_PASSWORD=${{ secrets.OPENSTACK_PASSWORD }}
-  #        export OS_AUTH_URL=https://api.nrec.no:5000/v3
-  #        export OS_IDENTITY_API_VERSION=3
-  #        export OS_USER_DOMAIN_NAME=dataporten
-  #        export OS_PROJECT_DOMAIN_NAME=dataporten
-  #        export OS_REGION_NAME=osl
-  #        export OS_INTERFACE=public
-  #        export OS_NO_CACHE=1
-  #        
-  #        openstack server rebuild --wait --image 97397a31-2517-4eb8-b66f-1d50c00dbb77 chap
-  #      shell: bash
+        #This rebuilds the instance using OpenStack CLI
+      - name: Rebuild CHAP instance
+        run: |
+          export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
+          export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
+          export OS_PASSWORD=${{ secrets.OPENSTACK_PASSWORD }}
+          export OS_AUTH_URL=https://api.nrec.no:5000/v3
+          export OS_IDENTITY_API_VERSION=3
+          export OS_USER_DOMAIN_NAME=dataporten
+          export OS_PROJECT_DOMAIN_NAME=dataporten
+          export OS_REGION_NAME=osl
+          export OS_INTERFACE=public
+          export OS_NO_CACHE=1
+          
+          openstack server rebuild --wait --image 97397a31-2517-4eb8-b66f-1d50c00dbb77 chap
+        shell: bash
       
   deployChap:
-    #needs: resetInstance
+    needs: resetInstance
     name: Deploy CHAP core to instance on NREC
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # This was added due to this error: https://stackoverflow.com/questions/20840012/ssh-remote-host-identification-has-changed
-  #   - name: Remove all keys belonging to hostname from a known_hosts file
-  #     run: |
-  #       ssh-keygen -R ${{ secrets.HOST }}
-  #     shell: bash
+      - name: Remove all keys belonging to hostname from a known_hosts file
+        run: |
+          ssh-keygen -R ${{ secrets.HOST }} || true
+        shell: bash
       - name: Clone CHAP Core repo
         run: |
           git clone https://github.com/dhis2-chap/chap-core-infrastructure-example.git infrastructure/
@@ -66,21 +66,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-        # - name: Scan host keys for host
-      - name: Attempting to scan host keys for
-        run: |
-           host="${{ secrets.HOST }}"
-           for i in {1..50}; do
-             echo "Attempting to scan host keys for ${host}, try #${i}"
-             ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
-             echo "Scan failed, retrying after 2s"
-             sleep 2
-           done || {
-             echo "Failed to scan host keys for ${host} after 50 attempts"
-             exit 1
-           } 
-        shell: bash
-        
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
         #Copty the infrastructure folder to the remote server
       - name: Copy files to remote server
         run: |
@@ -100,16 +86,5 @@ jobs:
             bash /home/ubuntu/chap-core/init.sh
           "
         shell: bash
-  varifyChap:
-    needs: deployChap
-    name: Verify CHAP core on NREC
-    runs-on: ubuntu-latest
-    steps:
-      - name: Verify CHAP core
-        run: |
-          curl -s -o /dev/null -w "200" http://"${{ secrets.HOST }}"/docs
-        shell: bash
-
-
 
 
