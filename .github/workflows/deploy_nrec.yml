@@ -64,7 +64,8 @@ jobs:
             ssh_key="${{ secrets.SSH_PRIVATE_KEY }}"
             echo "${ssh_key}" > ~/.ssh/id_rsa
             chmod 600 ~/.ssh/id_rsa
-            host="158.39.75.126"       
+            sleep 4
+            host="${{ secrets.HOST }}"       
             ssh-keyscan -H "${host}" >> ~/.ssh/known_hosts || {
               echo "Failed to scan host keys for ${host}"
               exit 1
@@ -75,6 +76,7 @@ jobs:
 #          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
         #Copty the infras
         shell: bash
+        
       - name: Copy files to remote server
         run: |
           scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
