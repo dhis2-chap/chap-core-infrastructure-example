@@ -16,10 +16,10 @@ lxc exec chap-core -- env
 lxc restart chap-core
 
 # don't think this is necessary HT
-sudo lxc config device add chap-core chapPort443 proxy listen=tcp:0.0.0.0:443 connect=tcp:127.0.0.1:8000
+#sudo lxc config device add chap-core chapPort443 proxy listen=tcp:0.0.0.0:443 connect=tcp:127.0.0.1:8000
 
 # Wait for the container to initialize
-sleep 30
+sleep 30 
 
 # Upload the initialization script to the container
 sudo lxc file push chap-core-lxd-container-init.sh chap-core/root/
