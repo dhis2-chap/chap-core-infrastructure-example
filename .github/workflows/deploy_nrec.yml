@@ -70,13 +70,8 @@ jobs:
               echo "Failed to scan host keys for ${host}"
               exit 1
             }
-#          mkdir -p ~/.ssh
-#          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-#          chmod 600 ~/.ssh/id_rsa
-#          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-        #Copty the infras
         shell: bash
-        
+
       - name: Copy files to remote server
         run: |
           scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
@@ -103,7 +98,7 @@ jobs:
     steps:
       - name: Verify CHAP core
         run: |
-          curl -s -o /dev/null -w "200" "${{ secrets.HOST }}":8000/docs
+          curl -s -o /dev/null -w "200" http://"${{ secrets.HOST }}"/docs
         shell: bash
 
 

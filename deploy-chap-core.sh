@@ -19,7 +19,7 @@ lxc restart chap-core
 # This repo is used for testing, and we only send test data to it, which is not sensitive. Therefore, we expose the CHAP Core URL/IP address.
 # DO NOT DO SET "FOR_TESTING = TRUE" IF YOU HAVE DATA YOU DO NOT WANT TO BE PUBLICLY ACCESSIBLE.
 if [ "$FOR_TESTING" = "TRUE" ]; then
-  sudo lxc config device add chap-core chapPort443 proxy listen=tcp:0.0.0.0:443 connect=tcp:127.0.0.1:8000
+  sudo lxc config device add chap-core chapPort80 proxy listen=tcp:0.0.0.0:80 connect=tcp:127.0.0.1:8000
 fi
 
 
