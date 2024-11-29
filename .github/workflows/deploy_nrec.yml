@@ -62,11 +62,24 @@ jobs:
       # Runs a single command using the runners shell
       - name: Write the SSH key to a file on GitHub Actions
         run: | 
-          sleep 4
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+          
+
+      - name: Attempting to scan host keys for
+        run: |
+           host="${{ secrets.HOST }}"
+           for i in {1..50}; do
+             echo "Attempting to scan host keys for ${host}, try #${i}"
+             ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
+             echo "Scan failed, retrying after 2s"
+             sleep 2
+           done || {
+             echo "Failed to scan host keys for ${host} after 50 attempts"
+             exit 1
+           } 
+        shell: bash
         #Copty the infrastructure folder to the remote server
       - name: Copy files to remote server
         run: |
@@ -86,5 +99,13 @@ jobs:
             bash /home/ubuntu/chap-core/init.sh
           "
         shell: bash
-
+  varifyChap:
+    needs: deployChap
+    name: Verify CHAP core on NREC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify CHAP core
+        run: |
+          curl -s -o /dev/null -w "200" http://"${{ secrets.HOST }}"/docs
+        shell: bash
 
