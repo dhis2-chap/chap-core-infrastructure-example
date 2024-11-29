@@ -13,62 +13,94 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    name: Deploy CHAP core to NREC
-    # The type of runner that the job will run on
+  resetInstance:
+    name: Reset CHAP core instance
     runs-on: ubuntu-latest
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
-
-      # This was added due to this error: https://stackoverflow.com/questions/20840012/ssh-remote-host-identification-has-changed
-      - name: Remove all keys belonging to hostname from a known_hosts file
+      - name: Install OpenStack CLI
         run: |
-          ssh-keygen -R ${{ secrets.HOST }} || true
+          sudo apt-get update
+          sudo snap install openstackclients
+          sudo apt  install python3-openstackclient
         shell: bash
 
-
-      - name: Clone CHAP Core repo
+      - name: Add OpenStack credentials
         run: |
-          git clone https://github.com/dhis2-chap/infrastructure.git
+          export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
+          export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
+          export OS_PASSWORD=${{ secrets.OPENSTACK_PASSWORD }}
+          export OS_AUTH_URL=https://api.nrec.no:5000/v3
+          export OS_IDENTITY_API_VERSION=3
+          export OS_USER_DOMAIN_NAME=dataporten
+          export OS_PROJECT_DOMAIN_NAME=dataporten
+          export OS_REGION_NAME=osl
+          export OS_INTERFACE=public
+          export OS_NO_CACHE=1
         shell: bash
-        
-      # Runs a single command using the runners shell
-      - name: Write the SSH key to a file on GitHub Actions
-        run: | 
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY2 }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-
-      # Delete the folder
-      - name: Delete existing folder at remote server
+      - name: Reset instance
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "rm -rf /home/ubuntu/chap-core"
-        shell: bash
-  
-      - name: Copy files to remote server
-        run: |
-          scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
+          openstack server list 
         shell: bash
 
-        # Step to change permissions on the remote server
-      - name: Change directory permissions on remote server
-        run: |
-          sleep 10
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
-        shell: bash
+#openstack server rebuild --wait --image 1b3b3b3b-3b3b-3b3b-3b3b-3b3b3b3b3b3b chap-core
 
-      - name: Set environment variables and run commands on remote server
-        run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "
-            export GOOGLE_SERVICE_ACCOUNT_EMAIL=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}\"
-            export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}\"
-            bash /home/ubuntu/chap-core/init.sh
-          "
-        shell: bash
+
+ # # This workflow contains a single job called "build"
+ # build:
+ #   name: Deploy CHAP core to NREC
+ #   # The type of runner that the job will run on
+ #   runs-on: ubuntu-latest
+ #   # Steps represent a sequence of tasks that will be executed as part of the job
+ #   steps:
+ #     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+ #     - uses: actions/checkout@v4
+
+ #     # This was added due to this error: https://stackoverflow.com/questions/20840012/ssh-remote-host-identification-has-changed
+ #     - name: Remove all keys belonging to hostname from a known_hosts file
+ #       run: |
+ #         ssh-keygen -R ${{ secrets.HOST }} || true
+ #       shell: bash
+
+
+ #     - name: Clone CHAP Core repo
+ #       run: |
+ #         git clone https://github.com/dhis2-chap/infrastructure.git
+ #       shell: bash
+ #       
+ #     # Runs a single command using the runners shell
+ #     - name: Write the SSH key to a file on GitHub Actions
+ #       run: | 
+ #         mkdir -p ~/.ssh
+ #         echo "${{ secrets.SSH_PRIVATE_KEY2 }}" > ~/.ssh/id_rsa
+ #         chmod 600 ~/.ssh/id_rsa
+ #         ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+ #     # Delete the folder
+ #     - name: Delete existing folder at remote server
+ #       run: |
+ #         ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "rm -rf /home/ubuntu/chap-core"
+ #       shell: bash
+ # 
+ #     - name: Copy files to remote server
+ #       run: |
+ #         scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
+ #       shell: bash
+
+ #       # Step to change permissions on the remote server
+ #     - name: Change directory permissions on remote server
+ #       run: |
+ #         sleep 10
+ #         ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
+ #       shell: bash
+
+ #     - name: Set environment variables and run commands on remote server
+ #       run: |
+ #         ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "
+ #           export GOOGLE_SERVICE_ACCOUNT_EMAIL=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}\"
+ #           export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}\"
+ #           bash /home/ubuntu/chap-core/init.sh
+ #         "
+ #       shell: bash
 
 
 
