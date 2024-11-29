@@ -15,8 +15,13 @@ lxc exec chap-core -- env
 
 lxc restart chap-core
 
-# don't think this is necessary HT
-#sudo lxc config device add chap-core chapPort443 proxy listen=tcp:0.0.0.0:443 connect=tcp:127.0.0.1:8000
+# As explained in the documentation, we do not want to expose the CHAP Core URL/IP address, since this will allow anyone to access the CHAP Core API.
+# This repo is used for testing, and we only send test data to it, which is not sensitive. Therefore, we expose the CHAP Core URL/IP address.
+# DO NOT DO SET "FOR_TESTING = TRUE" IF YOU HAVE DATA YOU DO NOT WANT TO BE PUBLICLY ACCESSIBLE.
+if [ "$FOR_TESTING" = "TRUE" ]; then
+  sudo lxc config device add chap-core chapPort443 proxy listen=tcp:0.0.0.0:443 connect=tcp:127.0.0.1:8000
+fi
+
 
 # Wait for the container to initialize
 sleep 30 
