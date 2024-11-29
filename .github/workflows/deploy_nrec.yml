@@ -86,6 +86,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            whoami
             mkdir test
 #            scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
 
