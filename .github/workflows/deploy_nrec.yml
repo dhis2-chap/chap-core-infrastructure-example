@@ -41,7 +41,7 @@ jobs:
 #     shell: bash
       - name: Create keyPair
         run: |
-            export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
+          export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
           export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
           export OS_PASSWORD=${{ secrets.OPENSTACK_PASSWORD }}
           export OS_AUTH_URL=https://api.nrec.no:5000/v3
