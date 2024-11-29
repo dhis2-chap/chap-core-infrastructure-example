@@ -53,7 +53,7 @@ jobs:
       # This was added due to this error: https://stackoverflow.com/questions/20840012/ssh-remote-host-identification-has-changed
       - name: Remove all keys belonging to hostname from a known_hosts file
         run: |
-          ssh-keygen -R ${{ secrets.HOST }} || true
+          ssh-keygen -R ${{ secrets.HOST }}
         shell: bash
       - name: Clone CHAP Core repo
         run: |
@@ -64,37 +64,37 @@ jobs:
         run: | 
           sleep 4
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-            # - name: Scan host keys for host
-      - name: Attempting to scan host keys for
-        run: |
-          host="${{ secrets.HOST }}"
-          for i in {1..50}; do
-            echo "Attempting to scan host keys for ${host}, try #${i}"
-            ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
-            echo "Scan failed, retrying after 2s"
-            sleep 50
-          done || {
-            echo "Failed to scan host keys for ${host} after 50 attempts"
-            exit 1
-          } 
-        shell: bash
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > nrec.pem
+          chmod 600 nrec.pem
+        # - name: Scan host keys for host
+     # - name: Attempting to scan host keys for
+     #   run: |
+     #     host="${{ secrets.HOST }}"
+     #     for i in {1..50}; do
+     #       echo "Attempting to scan host keys for ${host}, try #${i}"
+     #       ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
+     #       echo "Scan failed, retrying after 2s"
+     #       sleep 2
+     #     done || {
+     #       echo "Failed to scan host keys for ${host} after 50 attempts"
+     #       exit 1
+     #     } 
+     #   shell: bash
         
         #Copty the infrastructure folder to the remote server
       - name: Copy files to remote server
         run: |
-          scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
+          scp -i nrec.pem -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
         shell: bash
         # Step to change permissions on the remote server
       - name: Change directory permissions on remote server
         run: |
           sleep 4
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
+          ssh -i nrec.pem ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
         shell: bash
       - name: Set environment variables and run commands on remote server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "
+          ssh -i nrec.pem ${{ secrets.SSH_USERNAME }} "
             export GOOGLE_SERVICE_ACCOUNT_EMAIL=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}\"
             export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}\"
             bash /home/ubuntu/chap-core/init.sh
