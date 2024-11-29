@@ -67,24 +67,24 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > nrec.pem
           chmod 0600 nrec.pem
         # - name: Scan host keys for host
-     # - name: Attempting to scan host keys for
-     #   run: |
-     #     host="${{ secrets.HOST }}"
-     #     for i in {1..50}; do
-     #       echo "Attempting to scan host keys for ${host}, try #${i}"
-     #       ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
-     #       echo "Scan failed, retrying after 2s"
-     #       sleep 2
-     #     done || {
-     #       echo "Failed to scan host keys for ${host} after 50 attempts"
-     #       exit 1
-     #     } 
-     #   shell: bash
+      - name: Attempting to scan host keys for
+        run: |
+          host="${{ secrets.HOST }}"
+          for i in {1..50}; do
+            echo "Attempting to scan host keys for ${host}, try #${i}"
+            ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
+            echo "Scan failed, retrying after 2s"
+            sleep 2
+          done || {
+            echo "Failed to scan host keys for ${host} after 50 attempts"
+            exit 1
+          } 
+        shell: bash
         
         #Copty the infrastructure folder to the remote server
       - name: Copy files to remote server
         run: |
-          ssh-keygen -R ${{ secrets.HOST }}
+#ssh-keygen -R ${{ secrets.HOST }}
           scp -i nrec.pem -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
         shell: bash
         # Step to change permissions on the remote server
