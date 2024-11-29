@@ -52,9 +52,9 @@ jobs:
           export OS_INTERFACE=public
           export OS_NO_CACHE=1
 
-          openstack keypair create --private-key ~/.ssh/id_rsa chap-key
-          chmod 0600 ~/.ssh/id_rsa
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.HOST }} "echo 'Hello, world!'"
+          openstack keypair create --private-key nrec.pem chap-key
+          chmod 0600 nrec.pem
+          ssh -i nrec.pem ubuntu@${{ secrets.HOST }} "echo 'Hello, world!'"
 
         shell: bash
 
