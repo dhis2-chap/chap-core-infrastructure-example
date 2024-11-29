@@ -51,10 +51,10 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # This was added due to this error: https://stackoverflow.com/questions/20840012/ssh-remote-host-identification-has-changed
-  #    - name: Remove all keys belonging to hostname from a known_hosts file
-  #      run: |
-  #        ssh-keygen -R ${{ secrets.HOST }}
-  #      shell: bash
+      - name: Remove all keys belonging to hostname from a known_hosts file
+        run: |
+          ssh-keygen -R ${{ secrets.HOST }}
+        shell: bash
       - name: Clone CHAP Core repo
         run: |
           git clone https://github.com/dhis2-chap/chap-core-infrastructure-example.git infrastructure/
@@ -65,7 +65,7 @@ jobs:
           sleep 4
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 0600 ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
         # - name: Scan host keys for host
       - name: Attempting to scan host keys for
         run: |
