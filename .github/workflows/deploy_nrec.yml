@@ -39,8 +39,15 @@ jobs:
           
           openstack server rebuild --wait --image 97397a31-2517-4eb8-b66f-1d50c00dbb77 chap
         shell: bash
+      - name: Create keyPair
+        run: |
+          openstack keypair create --private-key ~/.ssh/id_rsa chap-key
+          chmod 0600 ~/.ssh/id_rsa
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.HOST }} "echo 'Hello, world!'"
 
-  createKeyPair
+        shell: bash
+
+
 
 
   deployChap:
@@ -60,27 +67,27 @@ jobs:
           git clone https://github.com/dhis2-chap/chap-core-infrastructure-example.git infrastructure
         shell: bash
       # Runs a single command using the runners shell
-      - name: Write the SSH key to a file on GitHub Actions
-        run: | 
-            set -e
-            mkdir -p ~/.ssh
-            ssh_key="${{ secrets.SSH_PRIVATE_KEY }}"
-            echo "${ssh_key}" > ~/.ssh/id_rsa
-            chmod 700 ~/.ssh/id_rsa
-        shell: bash
-      - name: Scan host keys for host
-        run: |
-            host="${{ secrets.HOST }}"
-            for i in {1..5}; do
-              echo "Attempting to scan host keys for ${host}, try #${i}"
-              ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
-              echo "Scan failed, retrying after 5s"
-              sleep 5
-            done || {
-              echo "Failed to scan host keys for ${host} after 5 attempts"
-              exit 1
-            }
-        shell: bash
+     # - name: Write the SSH key to a file on GitHub Actions
+     #   run: | 
+     #       set -e
+     #       mkdir -p ~/.ssh
+     #       ssh_key="${{ secrets.SSH_PRIVATE_KEY }}"
+     #       echo "${ssh_key}" > ~/.ssh/id_rsa
+     #       chmod 700 ~/.ssh/id_rsa
+     #   shell: bash
+     # - name: Scan host keys for host
+     #   run: |
+     #       host="${{ secrets.HOST }}"
+     #       for i in {1..5}; do
+     #         echo "Attempting to scan host keys for ${host}, try #${i}"
+     #         ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
+     #         echo "Scan failed, retrying after 5s"
+     #         sleep 5
+     #       done || {
+     #         echo "Failed to scan host keys for ${host} after 5 attempts"
+     #         exit 1
+     #       }
+     #   shell: bash
    #   - name: multiple command
    #     uses: appleboy/ssh-action@v1.2.0
    #     with:
