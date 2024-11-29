@@ -83,22 +83,22 @@ jobs:
             set -e
             mkdir -p ~/.ssh
             ssh_key="${{ secrets.SSH_PRIVATE_KEY }}"
-            echo "${ssh_key}" > ~/.ssh/id_rsa
-            chmod 700 ~/.ssh/id_rsa
+            echo "${ssh_key}" > nrec.pem
+            chmod 700 nrec.pem
         shell: bash
-      - name: Scan host keys for host
-        run: |
-            host="${{ secrets.HOST }}"
-            for i in {1..5}; do
-              echo "Attempting to scan host keys for ${host}, try #${i}"
-              ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
-              echo "Scan failed, retrying after 5s"
-              sleep 5
-            done || {
-              echo "Failed to scan host keys for ${host} after 5 attempts"
-              exit 1
-            }
-        shell: bash
+     # - name: Scan host keys for host
+     #   run: |
+     #       host="${{ secrets.HOST }}"
+     #       for i in {1..5}; do
+     #         echo "Attempting to scan host keys for ${host}, try #${i}"
+     #         ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
+     #         echo "Scan failed, retrying after 5s"
+     #         sleep 5
+     #       done || {
+     #         echo "Failed to scan host keys for ${host} after 5 attempts"
+     #         exit 1
+     #       }
+     #   shell: bash
    #   - name: multiple command
    #     uses: appleboy/ssh-action@v1.2.0
    #     with:
@@ -108,21 +108,21 @@ jobs:
    #       script: |
    #         whoami
    #         mkdir test
-#            scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
+#            scp -i nrec.pem -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
 
       - name: Copy files to remote server
         run: |
-          scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
+          scp -i nrec.pem -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
         shell: bash
         # Step to change permissions on the remote server
       - name: Change directory permissions on remote server
         run: |
           sleep 4
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
+          ssh -i nrec.pem ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
         shell: bash
       - name: Set environment variables and run commands on remote server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "
+          ssh -i nrec.pem ${{ secrets.SSH_USERNAME }} "
             export GOOGLE_SERVICE_ACCOUNT_EMAIL=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}\"
             export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}\"
             export FOR_TESTING="TRUE"
