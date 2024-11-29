@@ -100,7 +100,15 @@ jobs:
             bash /home/ubuntu/chap-core/init.sh
           "
         shell: bash
-
+  varifyChap:
+    needs: deployChap
+    name: Verify CHAP core on NREC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify CHAP core
+        run: |
+          curl -s -o /dev/null -w "200" http://"${{ secrets.HOST }}"/docs
+        shell: bash
 
 
 
