@@ -107,6 +107,6 @@ jobs:
     steps:
       - name: Verify CHAP core
         run: |
-          curl -s -o /dev/null -w "200" http://"${{ secrets.HOST }}"/docs
+          curl -s -o /dev/null -w "200" http://${{ secrets.HOST }}/docs
         shell: bash
 
