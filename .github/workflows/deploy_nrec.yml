@@ -43,7 +43,7 @@ jobs:
           export OS_INTERFACE=public
           export OS_NO_CACHE=1
           
-          openstack server rebuild --wait --image 97397a31-2517-4eb8-b66f-1d50c00dbb77 chap
+          openstack server rebuild --wait --image "GOLD Ubuntu 24.04 LTS" chap
         shell: bash
       
   deployChap:
