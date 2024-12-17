@@ -96,13 +96,17 @@ jobs:
         shell: bash
       - name: Set environment variables and run commands on remote server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "
-            export GOOGLE_SERVICE_ACCOUNT_EMAIL=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}\"
-            export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}\"
+          ssh -i ~/.ssh/id_rsa "${{ secrets.SSH_USERNAME }}" '
+            export GOOGLE_SERVICE_ACCOUNT_EMAIL="${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}"
+            export GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="${{ secrets.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY }}"
             export FOR_TESTING="TRUE"
+            export BRANCH_NAME="${BRANCH_NAME}"
             bash /home/ubuntu/chap-core/init.sh
-          "
+          '
         shell: bash
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
   varifyChap:
     needs: deployChap
     name: Verify CHAP core on NREC
@@ -110,6 +114,7 @@ jobs:
     steps:
       - name: Verify CHAP core
         run: |
+          sleep 30
           status_code=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.HOST }}/docs)
 
           # Check if the status code is 200
