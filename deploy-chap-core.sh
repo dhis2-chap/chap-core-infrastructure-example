@@ -19,9 +19,8 @@ if [ "$FOR_TESTING" = "TRUE" ]; then
   sudo lxc config device add chap-core chapPort80 proxy listen=tcp:0.0.0.0:80 connect=tcp:127.0.0.1:8000
 fi
 
-
 # Wait for the container to initialize
-sleep 30 s
+sleep 10
 
 # Upload the initialization script to the container
 sudo lxc file push chap-core-lxd-container-init.sh chap-core/root/
