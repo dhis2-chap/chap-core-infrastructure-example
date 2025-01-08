@@ -21,7 +21,7 @@ fi
 
 
 # Wait for the container to initialize
-sleep 30 
+sleep 30 s
 
 # Upload the initialization script to the container
 sudo lxc file push chap-core-lxd-container-init.sh chap-core/root/
@@ -37,4 +37,4 @@ sudo lxc file push .env chap-core/root/
 sudo lxc exec chap-core -- chmod +x /root/chap-core-lxd-container-init.sh
 
 # Run the initialization script within the container
-sudo lxc exec chap-core -- /root/chap-core-lxd-container-init.sh
+sudo lxc exec chap-core -- /root/chap-core-lxd-container-init.sh 

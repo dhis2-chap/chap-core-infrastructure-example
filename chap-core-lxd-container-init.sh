@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Update and install necessary packages
-apt-get update -y
-apt-get upgrade -y
+sudp apt-get update -y
+sudo apt-get upgrade -y
 
 sudo apt-get install \
  ca-certificates \
