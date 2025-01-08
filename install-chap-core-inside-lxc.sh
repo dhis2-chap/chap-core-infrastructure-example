@@ -1,4 +1,4 @@
-#!/bin/bash
+#This script will be copied inside the LXC container and will install and start CHAP Core when executed.
 
 # Update and install necessary packages
 echo "Running apt-get update..."
@@ -29,11 +29,12 @@ git clone https://github.com/dhis2-chap/chap-core /root/chap-core
 # Move .env file from root to chap-core directory
 mv /root/.env /root/chap-core/
 
+sleep 5
+
 # Navigate to the chap-core directory
 cd /root/chap-core
-
-sleep 5
 
 # Run Docker Compose
 docker compose up -d
 
+sleep 10
