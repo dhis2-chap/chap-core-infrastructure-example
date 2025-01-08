@@ -32,6 +32,8 @@ mv /root/.env /root/chap-core/
 # Navigate to the chap-core directory
 cd /root/chap-core
 
+sleep 5
+
 # Run Docker Compose
 docker compose up -d
 
