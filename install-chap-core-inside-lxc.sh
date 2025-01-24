@@ -35,7 +35,7 @@ sleep 5
 cd /root/chap-core
 
 # Run Docker Compose
-docker compose up #-d
+docker compose up -d
 
 docker ps
 
