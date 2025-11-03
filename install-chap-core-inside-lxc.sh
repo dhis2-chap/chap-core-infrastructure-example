@@ -26,7 +26,7 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 # Clone the chap-core repository
 #git clone -b dev https://github.com/dhis2-chap/chap-core /root/chap-core
 #git clone https://github.com/dhis2-chap/chap-core /root/chap-core
-git clone --depth 1 --branch v1.0.17 https://github.com/dhis2-chap/chap-core.git
+git clone --depth 1 --branch v1.1.0 https://github.com/dhis2-chap/chap-core.git
 
 # Move .env file from root to chap-core directory
 mv /root/.env /root/chap-core/
