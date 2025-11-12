@@ -6,8 +6,10 @@ BRANCH_OR_TAG="$3"
 
 CONTAINER_NAME="chap-core-$VERSION"
 
-
 sudo lxc launch ubuntu:24.04 $CONTAINER_NAME
+
+lxc storage volume create docker $CONTAINER_NAME size=90GB
+lxc config device add $CONTAINER_NAME docker disk pool=docker source=$CONTAINER_NAME path=/var/lib/docker
 
 lxc config set $CONTAINER_NAME security.nesting=true security.syscalls.intercept.mknod=true security.syscalls.intercept.setxattr=true
 
