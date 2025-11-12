@@ -1,7 +1,8 @@
 #!/bin/bash
 
 VERSION="$1"
-EXPOSE_PORT_8000="$2"
+EXPOSE_PORT="$2"
+BRANCH_OR_TAG="$3"
 
 CONTAINER_NAME="chap-core-$VERSION"
 
@@ -15,7 +16,7 @@ lxc config set $CONTAINER_NAME security.nesting=true security.syscalls.intercept
 # This repo is used for testing, and we only send test data to it, which is not sensitive. Therefore, we expose the CHAP Core URL/IP address.
 # DO NOT DO SET "FOR_TESTING = TRUE" IF YOU HAVE DATA YOU DO NOT WANT TO BE PUBLICLY ACCESSIBLE.
 if [ "$FOR_TESTING" = "TRUE" ]; then
-  sudo lxc config device add $CONTAINER_NAME port-$EXPOSE_PORT_8000 proxy listen=tcp:127.0.0.1:8000 connect=tcp:127.0.0.1:$EXPOSE_PORT_8000
+  sudo lxc config device add $CONTAINER_NAME port-$EXPOSE_PORT proxy listen=tcp:127.0.0.1:8000 connect=tcp:127.0.0.1:$EXPOSE_PORT
 fi
 
 # Wait for the container to initialize

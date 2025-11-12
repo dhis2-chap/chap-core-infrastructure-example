@@ -1,5 +1,5 @@
 #This script will be copied inside the LXC container and will install and start CHAP Core when executed.
-
+BRANCH_OR_TAG="$1"
 # Update and install necessary packages
 echo "Running apt-get update..."
 sudo apt-get update
@@ -26,7 +26,7 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 # Clone the chap-core repository
 #git clone -b dev https://github.com/dhis2-chap/chap-core /root/chap-core
 #git clone https://github.com/dhis2-chap/chap-core /root/chap-core
-git clone --depth 1 --branch v1.1.0 https://github.com/dhis2-chap/chap-core.git
+git clone --depth 1 --branch $BRANCH_OR_TAG https://github.com/dhis2-chap/chap-core.git
 
 # Move .env file from root to chap-core directory
 mv /root/.env /root/chap-core/
