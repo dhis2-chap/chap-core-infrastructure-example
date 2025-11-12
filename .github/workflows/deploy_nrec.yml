@@ -6,11 +6,11 @@ name: Scheduled deploy of chap-core
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
   #Every day at 1am
-  #schedule:
-  #  - cron: '0 1 * * *'
+  schedule:
+    - cron: "0 1 * * *"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -21,7 +21,7 @@ jobs:
     name: Reset CHAP core instance on NREC
     runs-on: ubuntu-latest
     steps:
-        #Install OpenStack CLI
+      #Install OpenStack CLI
       - name: Install OpenStack CLI
         run: |
           sudo apt-get update
@@ -30,7 +30,7 @@ jobs:
         shell: bash
 
         #This rebuilds the instance using OpenStack CLI
-      - name: Rebuild CHAP instance
+      - name: Rebuild Chap instance
         run: |
           export OS_USERNAME=${{ secrets.OPENSTACK_USERNAME }}
           export OS_PROJECT_NAME=${{ secrets.OPENSTACK_PROJECT_NAME }}
@@ -42,10 +42,10 @@ jobs:
           export OS_REGION_NAME=osl
           export OS_INTERFACE=public
           export OS_NO_CACHE=1
-          
+
           openstack server rebuild --wait --image "GOLD Ubuntu 24.04 LTS" chap
         shell: bash
-      
+
   deployChap:
     needs: resetInstance
     name: Deploy CHAP core to instance on NREC
@@ -64,24 +64,23 @@ jobs:
         shell: bash
       # Runs a single command using the runners shell
       - name: Write the SSH key to a file on GitHub Actions
-        run: | 
+        run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          
 
       - name: Attempting to scan host keys for
         run: |
-           host="${{ secrets.HOST }}"
-           for i in {1..50}; do
-             echo "Attempting to scan host keys for ${host}, try #${i}"
-             ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
-             echo "Scan failed, retrying after 2s"
-             sleep 2
-           done || {
-             echo "Failed to scan host keys for ${host} after 50 attempts"
-             exit 1
-           } 
+          host="${{ secrets.HOST }}"
+          for i in {1..50}; do
+            echo "Attempting to scan host keys for ${host}, try #${i}"
+            ssh-keyscan -T 10 -H "${host}" >> ~/.ssh/known_hosts 2>&1 && break
+            echo "Scan failed, retrying after 2s"
+            sleep 2
+          done || {
+            echo "Failed to scan host keys for ${host} after 50 attempts"
+            exit 1
+          }
         shell: bash
         #Copty the infrastructure folder to the remote server
       - name: Copy files to remote server
@@ -126,4 +125,3 @@ jobs:
           fi
 
         shell: bash
-
