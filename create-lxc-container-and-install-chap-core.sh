@@ -6,7 +6,9 @@ BRANCH_OR_TAG="$3"
 
 CONTAINER_NAME="chap-core-$VERSION"
 
-sudo lxc launch ubuntu:24.04 $CONTAINER_NAME
+echo "Creating LXC container: $CONTAINER_NAME"
+
+sudo lxc launch ubuntu:24.04 $CONTAINER_NAME --wait
 
 lxc storage volume create docker $CONTAINER_NAME size=90GB
 lxc config device add $CONTAINER_NAME docker disk pool=docker source=$CONTAINER_NAME path=/var/lib/docker
