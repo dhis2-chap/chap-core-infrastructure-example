@@ -21,7 +21,7 @@ echo "Running apt-get update..."
 sudo apt-get update
 
 echo "Running apt-get install..."
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io=1.7.28-1~debian.12~bookworm
 
 # Clone the chap-core repository
 #git clone -b dev https://github.com/dhis2-chap/chap-core /root/chap-core
