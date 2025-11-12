@@ -9,8 +9,6 @@ bash ./mount-volume.sh || exit 1
 #Install LXD, we do this before deploying CHAP Core, since we wipe the server for every deployment
 bash ./install-lxd.sh || exit 1
 
-bash ./install-docker-storage.sh || exit 1
-
 #This would deploy CHAP Core
 bash ./create-lxc-container-and-install-chap-core.sh "dev" "8000" "dev" || exit 1
 bash ./create-lxc-container-and-install-chap-core.sh "stable" "9000" "v1.1.0" || exit 1

@@ -5,13 +5,20 @@ EXPOSE_PORT="$2"
 BRANCH_OR_TAG="$3"
 
 CONTAINER_NAME="chap-core-$VERSION"
+DOCKER_NAME="docker-$VERSION"
+
+lxc storage create $DOCKER_NAME btrfs size=40GB
+
+sleep 10
 
 echo "Creating LXC container: $CONTAINER_NAME"
 
-sudo lxc launch ubuntu:24.04 $CONTAINER_NAME --wait
+sudo lxc launch ubuntu:24.04 $CONTAINER_NAME
 
-lxc storage volume create docker $CONTAINER_NAME size=90GB
-lxc config device add $CONTAINER_NAME docker disk pool=docker source=$CONTAINER_NAME path=/var/lib/docker
+wait 4
+
+lxc storage volume create $DOCKER_NAME $CONTAINER_NAME size=40GB
+lxc config device add $CONTAINER_NAME docker disk pool=$DOCKER_NAME source=$CONTAINER_NAME path=/var/lib/docker || exit 1
 
 lxc config set $CONTAINER_NAME security.nesting=true security.syscalls.intercept.mknod=true security.syscalls.intercept.setxattr=true
 
@@ -40,4 +47,4 @@ sudo lxc file push .env $CONTAINER_NAME/root/
 sudo lxc exec $CONTAINER_NAME -- chmod +x /root/install-chap-core-inside-lxc.sh
 
 # Run the initialization script within the container, this will intall CHAP Core inside the LXC container
-sudo lxc exec $CONTAINER_NAME -- /root/install-chap-core-inside-lxc.sh 
+sudo lxc exec $CONTAINER_NAME -- /root/install-chap-core-inside-lxc.sh $BRANCH_OR_TAG
