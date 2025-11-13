@@ -20,6 +20,7 @@ LOGS_ALIAS=""   # set dynamically after AppArmor/ACL checks
 # TLS paths for fundraise.no (Let's Encrypt layout)
 TLS_CERT="/etc/letsencrypt/live/fundraise.no/fullchain.pem"
 TLS_KEY="/etc/letsencrypt/live/fundraise.no/privkey.pem"
+ENABLE_TLS=0
 
 log()  { printf "\033[1;32m[+] %s\033[0m\n" "$*"; }
 warn() { printf "\033[1;33m[!] %s\033[0m\n" "$*" >&2; }
@@ -39,6 +40,27 @@ install_packages() {
   # apparmor-utils provides aa-status; not fatal if absent
   DEBIAN_FRONTEND=noninteractive apt-get install -y apparmor-utils || true
   systemctl enable nginx || true
+}
+
+install_certbot_and_issue() {
+  log "Installing certbot and nginx plugin…"
+  DEBIAN_FRONTEND=noninteractive apt-get install -y certbot python3-certbot-nginx || {
+    warn "Could not install certbot/python3-certbot-nginx; HTTPS issuance will be skipped."
+    return 0
+  }
+
+  # If certs already exist, don't re-issue
+  if [[ -f "${TLS_CERT}" && -f "${TLS_KEY}" ]]; then
+    log "Existing TLS certs found; skipping certbot issuance."
+    return 0
+  fi
+
+  log "Running certbot to issue certificates for fundraise.no (interactive; may prompt you)…"
+  if ! certbot certonly --nginx -d fundraise.no -d www.fundraise.no; then
+    warn "certbot failed to obtain certificates. Site will run HTTP-only for now."
+  else
+    log "certbot successfully obtained certificates."
+  fi
 }
 
 write_index() {
@@ -110,18 +132,24 @@ ensure_bind_mount_if_needed() {
 }
 
 check_tls_files() {
-  if [[ ! -f "${TLS_CERT}" || ! -f "${TLS_KEY}" ]]; then
+  if [[ -f "${TLS_CERT}" && -f "${TLS_KEY}" ]]; then
+    ENABLE_TLS=1
+    log "Found TLS certificate and key for fundraise.no."
+  else
+    ENABLE_TLS=0
     warn "TLS certificate/key not found at:"
     warn "  CERT: ${TLS_CERT}"
     warn "  KEY:  ${TLS_KEY}"
-    warn "HTTPS will not start correctly until certificates are in place (e.g. via certbot)."
-  else
-    log "Found TLS certificate and key for fundraise.no."
+    warn "Configuring HTTP-only for now."
   fi
 }
 
 nginx_conf_block() {
-  cat <<NGINX
+  if [[ "${ENABLE_TLS}" -eq 1 ]]; then
+    ############################
+    # HTTPS + HTTP redirect
+    ############################
+    cat <<NGINX
 # HTTP → HTTPS redirect for fundraise.no
 server {
     listen 80;
@@ -208,6 +236,76 @@ server {
     # add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 }
 NGINX
+  else
+    ############################
+    # HTTP-only (no SSL yet)
+    ############################
+    cat <<NGINX
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name ${SERVER_NAME};
+
+    root ${WEB_ROOT};
+    index index.html;
+
+    # Serve static index.html
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    # Allow /logs/, /logs, and /log -> all go to /logs/
+    location ^~ /logs {
+        # Redirect /log -> /logs/
+        if (\$uri = "/log") {
+            return 301 /logs/;
+        }
+
+        # Redirect /logs -> /logs/
+        if (\$uri = "/logs") {
+            return 301 /logs/;
+        }
+
+        alias ${LOGS_ALIAS}/;
+        autoindex on;
+        autoindex_exact_size off;
+        autoindex_localtime on;
+
+        # Prevent access to dotfiles
+        location ~ /\. {
+            deny all;
+        }
+    }
+
+    # /dev -> proxy to internal 127.0.0.1:8000
+    location /dev/ {
+        proxy_pass         ${DEV_BACKEND_URL};
+        proxy_http_version 1.1;
+        proxy_set_header   Host              \$host;
+        proxy_set_header   X-Real-IP         \$remote_addr;
+        proxy_set_header   X-Forwarded-For   \$proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto \$scheme;
+        proxy_set_header   Connection        "";
+    }
+
+    # /stable -> proxy to internal 127.0.0.1:9000
+    location /stable/ {
+        proxy_pass         ${STABLE_BACKEND_URL};
+        proxy_http_version 1.1;
+        proxy_set_header   Host              \$host;
+        proxy_set_header   X-Real-IP         \$remote_addr;
+        proxy_set_header   X-Forwarded-For   \$proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto \$scheme;
+        proxy_set_header   Connection        "";
+    }
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header Referrer-Policy no-referrer-when-downgrade always;
+}
+NGINX
+  fi
 }
 
 configure_nginx() {
@@ -239,14 +337,16 @@ start_nginx() {
 
 verify_http() {
   if command -v curl >/dev/null 2>&1; then
-    log "Verifying localhost HTTP (will redirect to HTTPS)…"
+    log "Verifying localhost HTTP…"
     curl -I http://127.0.0.1/ || warn "Root not reachable over HTTP"
     curl -I http://127.0.0.1/dev/ || warn "/dev not reachable over HTTP"
     curl -I http://127.0.0.1/stable/ || warn "/stable not reachable over HTTP"
     curl -I http://127.0.0.1/logs/ || warn "/logs not reachable over HTTP"
 
-    log "Attempting HTTPS check against fundraise.no (may fail if DNS not pointing here or cert invalid)…"
-    curl -Ik https://fundraise.no/ || warn "HTTPS check for https://fundraise.no/ failed"
+    if [[ "${ENABLE_TLS}" -eq 1 ]]; then
+      log "Attempting HTTPS check against fundraise.no (may fail if DNS not pointing here)…"
+      curl -Ik https://fundraise.no/ || warn "HTTPS check for https://fundraise.no/ failed"
+    fi
   fi
 
   log "Verifying nginx can see files in ${LOGS_ALIAS} as www-data…"
@@ -265,16 +365,28 @@ main() {
   ensure_logs_path
   set_acls_for_www_data
   ensure_bind_mount_if_needed
+
+  # Try to get certs before generating nginx config
+  install_certbot_and_issue
   check_tls_files
+
   configure_nginx
   open_firewall
   start_nginx
   verify_http
+
   log "✅ Done!"
-  log "→ Root:    https://fundraise.no/"
-  log "→ /dev:    https://fundraise.no/dev/    → ${DEV_BACKEND_URL}"
-  log "→ /stable: https://fundraise.no/stable/ → ${STABLE_BACKEND_URL}"
-  log "→ /logs:   https://fundraise.no/logs/   → ${LOGS_ALIAS}"
+  if [[ "${ENABLE_TLS}" -eq 1 ]]; then
+    log "→ Root:    https://fundraise.no/"
+    log "→ /dev:    https://fundraise.no/dev/    → ${DEV_BACKEND_URL}"
+    log "→ /stable: https://fundraise.no/stable/ → ${STABLE_BACKEND_URL}"
+    log "→ /logs:   https://fundraise.no/logs/   → ${LOGS_ALIAS}"
+  else
+    log "→ Root:    http://fundraise.no/ (HTTP-only, TLS issuance failed or not ready)"
+    log "→ /dev:    http://fundraise.no/dev/     → ${DEV_BACKEND_URL}"
+    log "→ /stable: http://fundraise.no/stable/  → ${STABLE_BACKEND_URL}"
+    log "→ /logs:   http://fundraise.no/logs/    → ${LOGS_ALIAS}"
+  fi
 }
 
 main "$@"
