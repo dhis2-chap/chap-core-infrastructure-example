@@ -118,9 +118,19 @@ server {
     location / {
         try_files \$uri \$uri/ =404;
     }
+    
+    # Allow /logs/, /logs, and /log -> all go to /logs/
+    location ^~ /logs {
+        # Redirect /log -> /logs/
+        if ($uri = "/log") {
+            return 301 /logs/;
+        }
 
-    # Browse logs at /logs/ (alias -> ${LOGS_ALIAS})
-    location /logs/ {
+        # Redirect /logs -> /logs/
+        if ($uri = "/logs") {
+            return 301 /logs/;
+        }
+
         alias ${LOGS_ALIAS}/;
         autoindex on;
         autoindex_exact_size off;

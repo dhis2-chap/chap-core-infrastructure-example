@@ -37,7 +37,11 @@ sleep 5
 cd /root/chap-core
 
 # Run Docker Compose
-docker compose up -d || exit 1
+LOG_FILE="/logs/chap-core-${BRANCH_OR_TAG}.txt"
+sudo mkdir -p /logs
+sudo touch "$LOG_FILE"
+echo "Starting Docker Compose for branch/tag: ${BRANCH_OR_TAG}" | tee -a "$LOG_FILE"
+docker compose up -d 2>&1 | tee -a "$LOG_FILE" || exit 1
 
 docker ps
 

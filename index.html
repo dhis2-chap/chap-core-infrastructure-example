@@ -8,6 +8,7 @@
       body {
         font-family: system-ui, sans-serif;
         margin: 2rem auto;
+        padding: 0.5rem;
         max-width: 700px;
         line-height: 1.6;
       }
@@ -39,6 +40,51 @@
       .server-item a:hover {
         text-decoration: underline;
       }
+
+      /* --- table styles --- */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        padding: 0.6rem 0.5rem;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      a {
+        color: #0066cc;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .status-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #e74c3c; /* default red */
+      }
+      .status-dot.ok {
+        background: #2ecc71; /* green */
+      }
+      td.status-cell,
+      th.status-cell {
+        text-align: right;
+      }
     </style>
   </head>
   <body>
@@ -51,15 +97,120 @@
       15 minutes of downtime.
     </p>
     <hr />
-    <div class="server-list">
-      <div class="server-item">
-        <span>chap-core</span>
-        <a href="/stable">/stable ➔</a>
+    <div>
+      <!-- Combined content starts here -->
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Version</th>
+            <th>URL</th>
+            <th>OpenAPI</th>
+            <th>Logs</th>
+            <th class="status-cell">Status</th>
+          </tr>
+        </thead>
+        <tbody id="versions-body">
+          <!-- Rows will be injected by JavaScript -->
+        </tbody>
+      </table>
+
+      <div style="text-align: right; margin-top: 30px">
+        <a href="/logs/">all logs ➔</a>
       </div>
-      <div class="server-item">
-        <span>chap-core-dev</span>
-        <a href="/dev">/dev ➔</a>
-      </div>
+
+      <script>
+        const versions = [{ VERSION: "stable" }, { VERSION: "dev" }];
+
+        const tbody = document.getElementById("versions-body");
+
+        function createRow(entry) {
+          const versionName = entry.VERSION;
+          const tr = document.createElement("tr");
+          const baseUrl = `${window.location.origin}/${versionName}`;
+
+          // Name
+          const nameTd = document.createElement("td");
+          nameTd.textContent = versionName;
+          tr.appendChild(nameTd);
+
+          // Version
+          const versionTd = document.createElement("td");
+          versionTd.textContent = "";
+          tr.appendChild(versionTd);
+
+          // URL cell
+          const urlTd = document.createElement("td");
+          const urlLink = document.createElement("a");
+          urlLink.href = baseUrl;
+          urlLink.textContent = baseUrl;
+          urlLink.target = "_blank";
+          urlLink.rel = "noopener noreferrer";
+          urlTd.appendChild(urlLink);
+          tr.appendChild(urlTd);
+
+          // OpenAPI link
+          const openApiTd = document.createElement("td");
+          const openApiLink = document.createElement("a");
+          openApiLink.href = `/${versionName}/openapi.json`;
+          openApiLink.textContent = "openapi.json";
+          openApiLink.target = "_blank";
+          openApiLink.rel = "noopener noreferrer";
+          openApiTd.appendChild(openApiLink);
+          tr.appendChild(openApiTd);
+
+          // Logs link
+          const logsTd = document.createElement("td");
+          const logsLink = document.createElement("a");
+          logsLink.href = `/logs/chap-core-${versionName}.txt`;
+          logsLink.target = "_blank";
+          logsLink.rel = "noopener noreferrer";
+          logsLink.textContent = "view logs";
+          logsTd.appendChild(logsLink);
+          tr.appendChild(logsTd);
+
+          // Status
+          const statusTd = document.createElement("td");
+          statusTd.className = "status-cell";
+          const statusDot = document.createElement("span");
+          statusDot.className = "status-dot";
+          statusDot.title = "Unknown / error";
+          statusTd.appendChild(statusDot);
+          tr.appendChild(statusTd);
+
+          // Fetch system-info
+          fetch(`/${versionName}/system-info`)
+            .then((response) => {
+              if (response.ok) {
+                statusDot.classList.add("ok");
+                statusDot.title = "OK (200)";
+              } else {
+                statusDot.classList.remove("ok");
+                statusDot.title = `Error (${response.status})`;
+              }
+              return response.ok ? response.json() : null;
+            })
+            .then((data) => {
+              if (data && typeof data.chap_core_version === "string") {
+                versionTd.textContent = data.chap_core_version;
+              } else {
+                versionTd.textContent = "";
+              }
+            })
+            .catch(() => {
+              statusDot.classList.remove("ok");
+              statusDot.title = "Error fetching system-info";
+              versionTd.textContent = "";
+            });
+
+          return tr;
+        }
+
+        versions.forEach((entry) => {
+          tbody.appendChild(createRow(entry));
+        });
+      </script>
+      <!-- Combined content ends here -->
     </div>
   </body>
 </html>
