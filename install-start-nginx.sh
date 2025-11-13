@@ -3,6 +3,7 @@ set -euo pipefail
 
 SITE_NAME="fundraise.no"
 SERVER_NAME="fundraise.no www.fundraise.no"
+CERTBOT_EMAIL="herman@dhis2.org"   # email for Let's Encrypt registration
 
 WEB_ROOT="/var/www/${SITE_NAME}"
 INDEX_FILE="${WEB_ROOT}/index.html"
@@ -55,8 +56,13 @@ install_certbot_and_issue() {
     return 0
   fi
 
-  log "Running certbot to issue certificates for fundraise.no (interactive; may prompt you)…"
-  if ! certbot certonly --nginx -d fundraise.no -d www.fundraise.no; then
+  log "Running certbot to issue certificates for fundraise.no (non-interactive)…"
+  if ! certbot certonly --nginx \
+    -d fundraise.no -d www.fundraise.no \
+    -m "${CERTBOT_EMAIL}" \
+    --agree-tos \
+    --no-eff-email \
+    -n; then
     warn "certbot failed to obtain certificates. Site will run HTTP-only for now."
   else
     log "certbot successfully obtained certificates."

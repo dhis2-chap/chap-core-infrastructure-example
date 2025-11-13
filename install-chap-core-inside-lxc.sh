@@ -40,8 +40,8 @@ cd /root/chap-core
 LOG_FILE="/logs/chap-core-${BRANCH_OR_TAG}.txt"
 sudo mkdir -p /logs
 sudo touch "$LOG_FILE"
-echo "Starting Docker Compose for branch/tag: ${BRANCH_OR_TAG}" | tee -a "$LOG_FILE"
-docker compose up -d 2>&1 | tee -a "$LOG_FILE" || exit 1
+echo "Starting Docker Compose for branch/tag: ${BRANCH_OR_TAG}" | sudo tee -a "$LOG_FILE"
+sudo docker compose up -d 2>&1 | sudo tee -a "$LOG_FILE" || exit 1
 
 docker ps
 
