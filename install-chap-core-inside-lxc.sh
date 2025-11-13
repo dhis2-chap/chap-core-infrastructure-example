@@ -1,48 +1,55 @@
-#This script will be copied inside the LXC container and will install and start CHAP Core when executed.
-BRANCH_OR_TAG="$1"
-# Update and install necessary packages
-echo "Running apt-get update..."
-sudo apt-get update
+#!/bin/bash
+set -euo pipefail
 
-sudo apt-get install \
- ca-certificates \
- curl \
- gnupg \
-  lsb-release
+# This script runs inside the LXC container and installs & starts CHAP Core.
+BRANCH_OR_TAG="$1"
+
+echo "Running apt-get update..."
+apt-get update -y
+
+echo "Installing base packages..."
+apt-get install -y \
+  ca-certificates \
+  curl \
+  gnupg \
+  lsb-release \
+  git
 
 # Install Docker
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+  | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
-echo \
-"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-$(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+  > /etc/apt/sources.list.d/docker.list
 
-echo "Running apt-get update..."
-sudo apt-get update
+echo "Running apt-get update (Docker repo)..."
+apt-get update -y
 
-echo "Running apt-get install..."
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io=1.7.28-1~ubuntu.24.04~noble
+echo "Installing Docker..."
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
 # Clone the chap-core repository
-#git clone -b dev https://github.com/dhis2-chap/chap-core /root/chap-core
-#git clone https://github.com/dhis2-chap/chap-core /root/chap-core
-git clone --depth 1 --branch $BRANCH_OR_TAG https://github.com/dhis2-chap/chap-core.git
+cd /root
+git clone --depth 1 --branch "$BRANCH_OR_TAG" https://github.com/dhis2-chap/chap-core.git
 
 # Move .env file from root to chap-core directory
-cp /root/.env /root/chap-core/
+cp /root/.env /root/chap-core/ || true
 
-sleep 5
+LOG_DIR=/root/logs
+mkdir -p "$LOG_DIR"
 
-# Navigate to the chap-core directory
+SAFE_BRANCH=${BRANCH_OR_TAG//\//_}
+LOG_FILE="$LOG_DIR/chap-core-${SAFE_BRANCH}.txt"
+touch "$LOG_FILE"
+
 cd /root/chap-core
 
-# Run Docker Compose
-LOG_FILE="/logs/chap-core-${BRANCH_OR_TAG}.txt"
-sudo mkdir -p /logs
-sudo touch "$LOG_FILE"
-echo "Starting Docker Compose for branch/tag: ${BRANCH_OR_TAG}" | sudo tee -a "$LOG_FILE"
-sudo docker compose up -d 2>&1 | sudo tee -a "$LOG_FILE" || exit 1
+echo "Starting Docker Compose for branch/tag: ${BRANCH_OR_TAG}" | tee -a "$LOG_FILE"
 
-docker ps
+# Start containers
+docker compose up -d 2>&1 | tee -a "$LOG_FILE"
 
-sleep 10
+# Grab some logs and exit (no -f to avoid hanging forever)
+docker compose logs --tail=200 2>&1 | tee -a "$LOG_FILE"
+
+docker ps >> "$LOG_FILE" 2>&1
