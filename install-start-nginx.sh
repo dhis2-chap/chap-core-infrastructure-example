@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SITE_NAME="helloworld"
+SITE_NAME="fundraise.no"
+SERVER_NAME="fundraise.no www.fundraise.no"
+
 WEB_ROOT="/var/www/${SITE_NAME}"
 INDEX_FILE="${WEB_ROOT}/index.html"
 INDEX_SOURCE="$(dirname "$(realpath "$0")")/index.html"
@@ -14,6 +16,10 @@ STABLE_BACKEND_URL="http://127.0.0.1:9000/"
 LOGS_SRC="/home/ubuntu/chap-core/logs"
 LOGS_BIND="${WEB_ROOT}/logs"
 LOGS_ALIAS=""   # set dynamically after AppArmor/ACL checks
+
+# TLS paths for fundraise.no (Let's Encrypt layout)
+TLS_CERT="/etc/letsencrypt/live/fundraise.no/fullchain.pem"
+TLS_KEY="/etc/letsencrypt/live/fundraise.no/privkey.pem"
 
 log()  { printf "\033[1;32m[+] %s\033[0m\n" "$*"; }
 warn() { printf "\033[1;33m[!] %s\033[0m\n" "$*" >&2; }
@@ -103,13 +109,44 @@ ensure_bind_mount_if_needed() {
   log "Logs alias target: ${LOGS_ALIAS}"
 }
 
+check_tls_files() {
+  if [[ ! -f "${TLS_CERT}" || ! -f "${TLS_KEY}" ]]; then
+    warn "TLS certificate/key not found at:"
+    warn "  CERT: ${TLS_CERT}"
+    warn "  KEY:  ${TLS_KEY}"
+    warn "HTTPS will not start correctly until certificates are in place (e.g. via certbot)."
+  else
+    log "Found TLS certificate and key for fundraise.no."
+  fi
+}
+
 nginx_conf_block() {
   cat <<NGINX
+# HTTP → HTTPS redirect for fundraise.no
 server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+    listen 80;
+    listen [::]:80;
 
-    server_name _;
+    server_name ${SERVER_NAME};
+
+    # Redirect everything to HTTPS
+    return 301 https://\$host\$request_uri;
+}
+
+# HTTPS server for fundraise.no
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name ${SERVER_NAME};
+
+    # --- TLS configuration (Let's Encrypt layout) ---
+    ssl_certificate     ${TLS_CERT};
+    ssl_certificate_key ${TLS_KEY};
+
+    # Optional but recommended when using certbot with nginx:
+    # include /etc/letsencrypt/options-ssl-nginx.conf;
+    # ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     root ${WEB_ROOT};
     index index.html;
@@ -118,16 +155,16 @@ server {
     location / {
         try_files \$uri \$uri/ =404;
     }
-    
+
     # Allow /logs/, /logs, and /log -> all go to /logs/
     location ^~ /logs {
         # Redirect /log -> /logs/
-        if ($uri = "/log") {
+        if (\$uri = "/log") {
             return 301 /logs/;
         }
 
         # Redirect /logs -> /logs/
-        if ($uri = "/logs") {
+        if (\$uri = "/logs") {
             return 301 /logs/;
         }
 
@@ -167,12 +204,14 @@ server {
     add_header X-Content-Type-Options nosniff always;
     add_header X-Frame-Options DENY always;
     add_header Referrer-Policy no-referrer-when-downgrade always;
+    # Optional: enable HSTS once you're sure HTTPS works and certs auto-renew:
+    # add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 }
 NGINX
 }
 
 configure_nginx() {
-  log "Writing Nginx site config (Ubuntu layout)…"
+  log "Writing Nginx site config for ${SITE_NAME} (Ubuntu layout)…"
   mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
   nginx_conf_block > "${DEBIAN_SITE_AVAIL}"
   ln -sfn "${DEBIAN_SITE_AVAIL}" "${DEBIAN_SITE_ENABLED}"
@@ -181,8 +220,8 @@ configure_nginx() {
 
 open_firewall() {
   if command -v ufw >/dev/null 2>&1 && ufw status | grep -qi "Status: active"; then
-    log "Allowing HTTP through UFW…"
-    ufw allow 'Nginx Full' || ufw allow 80/tcp || true
+    log "Allowing HTTP/HTTPS through UFW…"
+    ufw allow 'Nginx Full' || ufw allow 80/tcp || ufw allow 443/tcp || true
   fi
 }
 
@@ -200,19 +239,22 @@ start_nginx() {
 
 verify_http() {
   if command -v curl >/dev/null 2>&1; then
-    log "Verifying localhost HTTP…"
-    curl -I http://127.0.0.1/ || warn "Root not reachable"
-    curl -I http://127.0.0.1/dev/ || warn "/dev not reachable"
-    curl -I http://127.0.0.1/stable/ || warn "/stable not reachable"
-    curl -I http://127.0.0.1/logs/ || warn "/logs not reachable"
+    log "Verifying localhost HTTP (will redirect to HTTPS)…"
+    curl -I http://127.0.0.1/ || warn "Root not reachable over HTTP"
+    curl -I http://127.0.0.1/dev/ || warn "/dev not reachable over HTTP"
+    curl -I http://127.0.0.1/stable/ || warn "/stable not reachable over HTTP"
+    curl -I http://127.0.0.1/logs/ || warn "/logs not reachable over HTTP"
+
+    log "Attempting HTTPS check against fundraise.no (may fail if DNS not pointing here or cert invalid)…"
+    curl -Ik https://fundraise.no/ || warn "HTTPS check for https://fundraise.no/ failed"
   fi
 
   log "Verifying nginx can see files in ${LOGS_ALIAS} as www-data…"
   sudo -u www-data bash -c "ls -la '${LOGS_ALIAS}' || true"
-  if [[ -f "${LOGS_ALIAS}" ]]; then
+  if [[ -d "${LOGS_ALIAS}" ]]; then
     sudo -u www-data bash -c "stat '${LOGS_ALIAS}' || true"
   else
-    warn "Expected file '${LOGS_ALIAS}' not found (check name/path)."
+    warn "Expected directory '${LOGS_ALIAS}' not found (check name/path)."
   fi
 }
 
@@ -223,15 +265,16 @@ main() {
   ensure_logs_path
   set_acls_for_www_data
   ensure_bind_mount_if_needed
+  check_tls_files
   configure_nginx
   open_firewall
   start_nginx
   verify_http
   log "✅ Done!"
-  log "→ Root:    http://<server-ip>/"
-  log "→ /dev:    http://<server-ip>/dev/    → ${DEV_BACKEND_URL}"
-  log "→ /stable: http://<server-ip>/stable/ → ${STABLE_BACKEND_URL}"
-  log "→ /logs:   http://<server-ip>/logs/   → ${LOGS_ALIAS}"
+  log "→ Root:    https://fundraise.no/"
+  log "→ /dev:    https://fundraise.no/dev/    → ${DEV_BACKEND_URL}"
+  log "→ /stable: https://fundraise.no/stable/ → ${STABLE_BACKEND_URL}"
+  log "→ /logs:   https://fundraise.no/logs/   → ${LOGS_ALIAS}"
 }
 
 main "$@"
