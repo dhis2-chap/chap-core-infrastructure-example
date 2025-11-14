@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SITE_NAME="fundraise.no"
-SERVER_NAME="fundraise.no www.fundraise.no"
+SITE_NAME="chap-servers.dhis2.org"
+SERVER_NAME="chap-servers.dhis2.org www.chap-servers.dhis2.org"
 CERTBOT_EMAIL="herman@dhis2.org"   # email for Let's Encrypt registration
 
 WEB_ROOT="/var/www/${SITE_NAME}"
@@ -18,9 +18,9 @@ LOGS_SRC="/home/ubuntu/chap-core/logs"
 LOGS_BIND="${WEB_ROOT}/logs"
 LOGS_ALIAS=""   # set dynamically after AppArmor/ACL checks
 
-# TLS paths for fundraise.no (Let's Encrypt layout)
-TLS_CERT="/etc/letsencrypt/live/fundraise.no/fullchain.pem"
-TLS_KEY="/etc/letsencrypt/live/fundraise.no/privkey.pem"
+# TLS paths for chap-servers.dhis2.org (Let's Encrypt layout)
+TLS_CERT="/etc/letsencrypt/live/chap-servers.dhis2.org/fullchain.pem"
+TLS_KEY="/etc/letsencrypt/live/chap-servers.dhis2.org/privkey.pem"
 ENABLE_TLS=0
 
 log()  { printf "\033[1;32m[+] %s\033[0m\n" "$*"; }
@@ -56,9 +56,9 @@ install_certbot_and_issue() {
     return 0
   fi
 
-  log "Running certbot to issue certificates for fundraise.no (non-interactive)…"
+  log "Running certbot to issue certificates for chap-servers.dhis2.org (non-interactive)…"
   if ! certbot certonly --nginx \
-    -d fundraise.no -d www.fundraise.no \
+    -d chap-servers.dhis2.org -d www.chap-servers.dhis2.org \
     -m "${CERTBOT_EMAIL}" \
     --agree-tos \
     --no-eff-email \
@@ -140,7 +140,7 @@ ensure_bind_mount_if_needed() {
 check_tls_files() {
   if [[ -f "${TLS_CERT}" && -f "${TLS_KEY}" ]]; then
     ENABLE_TLS=1
-    log "Found TLS certificate and key for fundraise.no."
+    log "Found TLS certificate and key for chap-servers.dhis2.org."
   else
     ENABLE_TLS=0
     warn "TLS certificate/key not found at:"
@@ -156,7 +156,7 @@ nginx_conf_block() {
     # HTTPS + HTTP redirect
     ############################
     cat <<NGINX
-# HTTP → HTTPS redirect for fundraise.no
+# HTTP → HTTPS redirect for chap-servers.dhis2.org
 server {
     listen 80;
     listen [::]:80;
@@ -167,7 +167,7 @@ server {
     return 301 https://\$host\$request_uri;
 }
 
-# HTTPS server for fundraise.no
+# HTTPS server for chap-servers.dhis2.org
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
@@ -350,8 +350,8 @@ verify_http() {
     curl -I http://127.0.0.1/logs/ || warn "/logs not reachable over HTTP"
 
     if [[ "${ENABLE_TLS}" -eq 1 ]]; then
-      log "Attempting HTTPS check against fundraise.no (may fail if DNS not pointing here)…"
-      curl -Ik https://fundraise.no/ || warn "HTTPS check for https://fundraise.no/ failed"
+      log "Attempting HTTPS check against chap-servers.dhis2.org (may fail if DNS not pointing here)…"
+      curl -Ik https://chap-servers.dhis2.org/ || warn "HTTPS check for https://chap-servers.dhis2.org/ failed"
     fi
   fi
 
@@ -383,15 +383,15 @@ main() {
 
   log "✅ Done!"
   if [[ "${ENABLE_TLS}" -eq 1 ]]; then
-    log "→ Root:    https://fundraise.no/"
-    log "→ /dev:    https://fundraise.no/dev/    → ${DEV_BACKEND_URL}"
-    log "→ /stable: https://fundraise.no/stable/ → ${STABLE_BACKEND_URL}"
-    log "→ /logs:   https://fundraise.no/logs/   → ${LOGS_ALIAS}"
+    log "→ Root:    https://chap-servers.dhis2.org/"
+    log "→ /dev:    https://chap-servers.dhis2.org/dev/    → ${DEV_BACKEND_URL}"
+    log "→ /stable: https://chap-servers.dhis2.org/stable/ → ${STABLE_BACKEND_URL}"
+    log "→ /logs:   https://chap-servers.dhis2.org/logs/   → ${LOGS_ALIAS}"
   else
-    log "→ Root:    http://fundraise.no/ (HTTP-only, TLS issuance failed or not ready)"
-    log "→ /dev:    http://fundraise.no/dev/     → ${DEV_BACKEND_URL}"
-    log "→ /stable: http://fundraise.no/stable/  → ${STABLE_BACKEND_URL}"
-    log "→ /logs:   http://fundraise.no/logs/    → ${LOGS_ALIAS}"
+    log "→ Root:    http://chap-servers.dhis2.org/ (HTTP-only, TLS issuance failed or not ready)"
+    log "→ /dev:    http://chap-servers.dhis2.org/dev/     → ${DEV_BACKEND_URL}"
+    log "→ /stable: http://chap-servers.dhis2.org/stable/  → ${STABLE_BACKEND_URL}"
+    log "→ /logs:   http://chap-servers.dhis2.org/logs/    → ${LOGS_ALIAS}"
   fi
 }
 
