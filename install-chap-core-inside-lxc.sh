@@ -25,7 +25,7 @@ echo "Running apt-get update (Docker repo)..."
 apt-get update -y
 
 echo "Installing Docker..."
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+apt-get install -y docker-ce docker-ce-cli containerd.io=1.7.28-1~ubuntu.24.04~noble docker-compose-plugin
 
 # Clone the repo
 cd /root

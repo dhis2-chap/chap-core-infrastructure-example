@@ -14,9 +14,7 @@ sudo lxc storage create "$DOCKER_NAME" btrfs size=40GB || true
 sleep 10
 
 echo "Creating LXC container: $CONTAINER_NAME"
-sudo lxc launch ubuntu:24.04 "$CONTAINER_NAME" \
-  -c security.nesting=true \
-  -c security.privileged=true
+sudo lxc launch ubuntu:24.04 "$CONTAINER_NAME"
 
 sleep 4
 

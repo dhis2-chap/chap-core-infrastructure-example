@@ -114,7 +114,7 @@ jobs:
       - name: Verify CHAP core
         run: |
           sleep 30
-          status_code=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.HOST }}/stable/system-info)
+          status_code=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.HOST }}/stable/v1/system-info)
 
           # Check if the status code is 200
           if [ "$status_code" -eq 200 ]; then
