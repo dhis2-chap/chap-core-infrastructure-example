@@ -1,7 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-# This script runs inside the LXC container and installs & starts CHAP Core.
 BRANCH_OR_TAG="$1"
 
 echo "Running apt-get update..."
@@ -28,11 +27,10 @@ apt-get update -y
 echo "Installing Docker..."
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-# Clone the chap-core repository
+# Clone the repo
 cd /root
 git clone --depth 1 --branch "$BRANCH_OR_TAG" https://github.com/dhis2-chap/chap-core.git
 
-# Move .env file from root to chap-core directory
 cp /root/.env /root/chap-core/ || true
 
 LOG_DIR=/root/logs
@@ -46,10 +44,8 @@ cd /root/chap-core
 
 echo "Starting Docker Compose for branch/tag: ${BRANCH_OR_TAG}" | tee -a "$LOG_FILE"
 
-# Start containers
 docker compose up -d 2>&1 | tee -a "$LOG_FILE"
 
-# Grab some logs and exit (no -f to avoid hanging forever)
 docker compose logs --tail=200 2>&1 | tee -a "$LOG_FILE"
 
 docker ps >> "$LOG_FILE" 2>&1

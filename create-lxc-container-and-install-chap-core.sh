@@ -14,14 +14,19 @@ sudo lxc storage create "$DOCKER_NAME" btrfs size=40GB || true
 sleep 10
 
 echo "Creating LXC container: $CONTAINER_NAME"
-sudo lxc launch ubuntu:24.04 "$CONTAINER_NAME"
+sudo lxc launch ubuntu:24.04 "$CONTAINER_NAME" \
+  -c security.nesting=true \
+  -c security.privileged=true
 
 sleep 4
 
 sudo lxc storage volume create "$DOCKER_NAME" "$CONTAINER_NAME" size=40GB || true
 sudo lxc config device add "$CONTAINER_NAME" docker disk pool="$DOCKER_NAME" source="$CONTAINER_NAME" path=/var/lib/docker || true
 
-sudo lxc config set "$CONTAINER_NAME" security.nesting=true security.syscalls.intercept.mknod=true security.syscalls.intercept.setxattr=true
+# Retain syscall intercepts
+sudo lxc config set "$CONTAINER_NAME" \
+  security.syscalls.intercept.mknod=true \
+  security.syscalls.intercept.setxattr=true
 
 if [ "${FOR_TESTING:-}" = "TRUE" ]; then
   sudo lxc config device add "$CONTAINER_NAME" "port-$EXPOSE_PORT" proxy \
