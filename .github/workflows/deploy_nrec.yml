@@ -43,7 +43,6 @@ jobs:
           export OS_INTERFACE=public
           export OS_NO_CACHE=1
   
-          sleep 20 #avoid Cannot 'rebuild' instance 115c62dc-1da9-463c-bded-616510bd2c18 while it is in task_state rebuildin
           openstack server rebuild --wait --image "GOLD Ubuntu 24.04 LTS" chap
         shell: bash
 
