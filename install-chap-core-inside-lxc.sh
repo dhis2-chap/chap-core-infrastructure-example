@@ -3,6 +3,15 @@ set -euo pipefail
 
 BRANCH_OR_TAG="$1"
 
+LOG_DIR=/root/logs
+mkdir -p "$LOG_DIR"
+
+SAFE_BRANCH=${BRANCH_OR_TAG//\//_}
+LOG_FILE="$LOG_DIR/chap-core-${SAFE_BRANCH}.txt"
+
+# Send all output to both the log file and stdout
+exec > >(tee -a "$LOG_FILE") 2>&1
+
 echo "Running apt-get update..."
 apt-get update -y
 
@@ -33,19 +42,12 @@ git clone --depth 1 --branch "$BRANCH_OR_TAG" https://github.com/dhis2-chap/chap
 
 cp /root/.env /root/chap-core/ || true
 
-LOG_DIR=/root/logs
-mkdir -p "$LOG_DIR"
-
-SAFE_BRANCH=${BRANCH_OR_TAG//\//_}
-LOG_FILE="$LOG_DIR/chap-core-${SAFE_BRANCH}.txt"
-touch "$LOG_FILE"
-
 cd /root/chap-core
 
-echo "Starting Docker Compose for branch/tag: ${BRANCH_OR_TAG}" | tee -a "$LOG_FILE"
+echo "Starting Docker Compose for branch/tag: ${BRANCH_OR_TAG}"
 
-docker compose up -d 2>&1 | tee -a "$LOG_FILE"
+docker compose up -d
 
-docker compose logs --tail=200 2>&1 | tee -a "$LOG_FILE"
+docker compose logs --tail=200
 
-docker ps >> "$LOG_FILE" 2>&1
+docker ps
