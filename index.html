@@ -93,7 +93,7 @@
       These servers are publicly available and can be used to connect to the
       DHIS2 Modeling App. However, please note that you do so at your own risk.
       <b>Do not upload or transmit any private or sensitive data.</b> All
-      servers are reset every night at 01:00 UTC, which results in approximately
+      servers are reset every Saturday at 01:00 CET, which results in approximately
       15 minutes of downtime.
     </p>
     <hr />
@@ -162,7 +162,7 @@
           // Logs link
           const logsTd = document.createElement("td");
           const logsLink = document.createElement("a");
-          logsLink.href = `/logs/chap-core-${versionName}.txt`;
+          logsLink.href = `/logs/chap-core-${versionName}/`;
           logsLink.target = "_blank";
           logsLink.rel = "noopener noreferrer";
           logsLink.textContent = "view logs";

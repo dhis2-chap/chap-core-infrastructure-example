@@ -14,7 +14,7 @@ DEV_BACKEND_URL="http://127.0.0.1:8000/"
 STABLE_BACKEND_URL="http://127.0.0.1:9000/"
 
 # Logs: source path and (optional) bind mount path (used if AppArmor blocks direct access)
-LOGS_SRC="/home/ubuntu/chap-core/logs"
+LOGS_SRC="/logs"
 LOGS_BIND="${WEB_ROOT}/logs"
 LOGS_ALIAS=""   # set dynamically after AppArmor/ACL checks
 
@@ -91,9 +91,6 @@ ensure_logs_path() {
 set_acls_for_www_data() {
   log "Granting www-data traverse/read ACLs for logs path…"
   # Traverse on parents
-  setfacl -m u:www-data:rx /home || true
-  setfacl -m u:www-data:rx /home/ubuntu || true
-  setfacl -m u:www-data:rx /home/ubuntu/chap-core || true
   setfacl -m u:www-data:rx "${LOGS_SRC}" || true
   # Read/execute on everything inside logs (X = only directories + exec bits)
   setfacl -R -m u:www-data:rX "${LOGS_SRC}" || true
