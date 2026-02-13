@@ -42,7 +42,7 @@ jobs:
           export OS_REGION_NAME=osl
           export OS_INTERFACE=public
           export OS_NO_CACHE=1
-
+  
           openstack server rebuild --wait --image "GOLD Ubuntu 24.04 LTS" chap
         shell: bash
 
