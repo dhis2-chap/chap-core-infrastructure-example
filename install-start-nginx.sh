@@ -10,7 +10,7 @@ INDEX_FILE="${WEB_ROOT}/index.html"
 INDEX_SOURCE="$(dirname "$(realpath "$0")")/index.html"
 DEBIAN_SITE_AVAIL="/etc/nginx/sites-available/${SITE_NAME}"
 DEBIAN_SITE_ENABLED="/etc/nginx/sites-enabled/${SITE_NAME}"
-DEV_BACKEND_URL="http://127.0.0.1:8000/"
+MASTER_BACKEND_URL="http://127.0.0.1:8000/"
 STABLE_BACKEND_URL="http://127.0.0.1:9000/"
 
 # Logs: source path and (optional) bind mount path (used if AppArmor blocks direct access)
@@ -181,6 +181,7 @@ server {
 
     root ${WEB_ROOT};
     index index.html;
+    client_max_body_size 1g;
 
     # Serve static index.html
     location / {
@@ -210,9 +211,9 @@ server {
         }
     }
 
-    # /dev -> proxy to internal 127.0.0.1:8000
-    location /dev/ {
-        proxy_pass         ${DEV_BACKEND_URL};
+    # /master -> proxy to internal 127.0.0.1:8000
+    location /master/ {
+        proxy_pass         ${MASTER_BACKEND_URL};
         proxy_http_version 1.1;
         proxy_set_header   Host              \$host;
         proxy_set_header   X-Real-IP         \$remote_addr;
@@ -252,6 +253,7 @@ server {
 
     root ${WEB_ROOT};
     index index.html;
+    client_max_body_size 1g;
 
     # Serve static index.html
     location / {
@@ -281,9 +283,9 @@ server {
         }
     }
 
-    # /dev -> proxy to internal 127.0.0.1:8000
-    location /dev/ {
-        proxy_pass         ${DEV_BACKEND_URL};
+    # /master -> proxy to internal 127.0.0.1:8000
+    location /master/ {
+        proxy_pass         ${MASTER_BACKEND_URL};
         proxy_http_version 1.1;
         proxy_set_header   Host              \$host;
         proxy_set_header   X-Real-IP         \$remote_addr;
@@ -342,7 +344,7 @@ verify_http() {
   if command -v curl >/dev/null 2>&1; then
     log "Verifying localhost HTTP…"
     curl -I http://127.0.0.1/ || warn "Root not reachable over HTTP"
-    curl -I http://127.0.0.1/dev/ || warn "/dev not reachable over HTTP"
+    curl -I http://127.0.0.1/master/ || warn "/master not reachable over HTTP"
     curl -I http://127.0.0.1/stable/ || warn "/stable not reachable over HTTP"
     curl -I http://127.0.0.1/logs/ || warn "/logs not reachable over HTTP"
 
@@ -381,12 +383,12 @@ main() {
   log "✅ Done!"
   if [[ "${ENABLE_TLS}" -eq 1 ]]; then
     log "→ Root:    https://chap-servers.dhis2.org/"
-    log "→ /dev:    https://chap-servers.dhis2.org/dev/    → ${DEV_BACKEND_URL}"
+    log "→ /master:    https://chap-servers.dhis2.org/dev/    → ${MASTER_BACKEND_URL}"
     log "→ /stable: https://chap-servers.dhis2.org/stable/ → ${STABLE_BACKEND_URL}"
     log "→ /logs:   https://chap-servers.dhis2.org/logs/   → ${LOGS_ALIAS}"
   else
     log "→ Root:    http://chap-servers.dhis2.org/ (HTTP-only, TLS issuance failed or not ready)"
-    log "→ /dev:    http://chap-servers.dhis2.org/dev/     → ${DEV_BACKEND_URL}"
+    log "→ /master:    http://chap-servers.dhis2.org/dev/     → ${MASTER_BACKEND_URL}"
     log "→ /stable: http://chap-servers.dhis2.org/stable/  → ${STABLE_BACKEND_URL}"
     log "→ /logs:   http://chap-servers.dhis2.org/logs/    → ${LOGS_ALIAS}"
   fi

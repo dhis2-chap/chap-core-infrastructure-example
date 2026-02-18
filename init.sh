@@ -13,4 +13,4 @@ bash ./install-lxd.sh || exit 1
 
 #This would deploy CHAP Core
 bash ./create-lxc-container-and-install-chap-core.sh "stable" "9000" "$LATEST_STABLE" || exit 1
-bash ./create-lxc-container-and-install-chap-core.sh "dev" "8000" "master" || exit 1
+bash ./create-lxc-container-and-install-chap-core.sh "master" "8000" "master" || exit 1
