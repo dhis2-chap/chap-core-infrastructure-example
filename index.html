@@ -178,8 +178,8 @@
           statusTd.appendChild(statusDot);
           tr.appendChild(statusTd);
 
-          // Fetch system-info
-          fetch(`/${versionName}/system-info`)
+          // Fetch health
+          fetch(`/${versionName}/health`)
             .then((response) => {
               if (response.ok) {
                 statusDot.classList.add("ok");
@@ -199,7 +199,7 @@
             })
             .catch(() => {
               statusDot.classList.remove("ok");
-              statusDot.title = "Error fetching system-info";
+              statusDot.title = "Error fetching health";
               versionTd.textContent = "";
             });
 
