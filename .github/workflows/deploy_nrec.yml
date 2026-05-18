@@ -82,16 +82,37 @@ jobs:
             exit 1
           }
         shell: bash
-        #Copty the infrastructure folder to the remote server
+        # Copy the infrastructure folder to the remote server.
+        # Freshly-rebuilt NREC instances often accept TCP on :22 but reset
+        # the SSH handshake while cloud-init finalises sshd, so retry.
       - name: Copy files to remote server
         run: |
-          scp -i ~/.ssh/id_rsa -r infrastructure/ ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core
+          for i in {1..30}; do
+            echo "scp attempt #${i}"
+            scp -o ConnectTimeout=10 -o ServerAliveInterval=5 \
+                -i ~/.ssh/id_rsa -r infrastructure/ \
+                ${{ secrets.SSH_USERNAME }}:/home/ubuntu/chap-core && break
+            echo "scp failed, retrying after 4s"
+            sleep 4
+          done || {
+            echo "scp failed after 30 attempts"
+            exit 1
+          }
         shell: bash
         # Step to change permissions on the remote server
       - name: Change directory permissions on remote server
         run: |
-          sleep 4
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} "sudo chmod -R 775 /home/ubuntu/chap-core"
+          for i in {1..30}; do
+            echo "chmod ssh attempt #${i}"
+            ssh -o ConnectTimeout=10 -o ServerAliveInterval=5 \
+                -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }} \
+                "sudo chmod -R 775 /home/ubuntu/chap-core" && break
+            echo "ssh failed, retrying after 4s"
+            sleep 4
+          done || {
+            echo "chmod ssh failed after 30 attempts"
+            exit 1
+          }
         shell: bash
       - name: Set environment variables and run commands on remote server
         run: |
