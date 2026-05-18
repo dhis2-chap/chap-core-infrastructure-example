@@ -46,7 +46,16 @@ cd /root/chap-core
 
 echo "Starting Docker Compose for branch/tag: ${BRANCH_OR_TAG}"
 
-docker compose up -d
+# Mirror chap-core's `make restart` semantics: include the chapkit overlay
+# when the checked-out branch/tag ships it. Today: master only; stable will
+# adopt it in 2.0. No script change needed when that happens.
+COMPOSE_FILES=(-f compose.yml)
+if [[ -f compose.chapkit.yml ]]; then
+  COMPOSE_FILES+=(-f compose.chapkit.yml)
+  echo "chapkit overlay detected; including compose.chapkit.yml"
+fi
+
+docker compose "${COMPOSE_FILES[@]}" up -d --build --remove-orphans
 
 docker compose logs --tail=200
 
