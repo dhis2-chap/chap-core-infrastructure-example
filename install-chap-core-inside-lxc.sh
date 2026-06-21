@@ -34,7 +34,19 @@ echo "Running apt-get update (Docker repo)..."
 apt-get update -y
 
 echo "Installing Docker..."
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+# Pin all four Docker packages to one coherent, deploy-tested release set so
+# installs are reproducible and an upstream Docker bump can't break a deploy
+# unannounced. The versions must agree (docker-ce depends on a containerd.io
+# range). To upgrade: bump these together to a newer set from
+# `apt-cache madison <pkg>` and land it as its own PR so it gets tested first.
+DOCKER_VERSION="5:29.6.0-1~ubuntu.24.04~noble"
+CONTAINERD_VERSION="2.2.5-1~ubuntu.24.04~noble"
+COMPOSE_PLUGIN_VERSION="5.1.4-1~ubuntu.24.04~noble"
+apt-get install -y \
+  "docker-ce=${DOCKER_VERSION}" \
+  "docker-ce-cli=${DOCKER_VERSION}" \
+  "containerd.io=${CONTAINERD_VERSION}" \
+  "docker-compose-plugin=${COMPOSE_PLUGIN_VERSION}"
 
 # Clone the repo
 cd /root
