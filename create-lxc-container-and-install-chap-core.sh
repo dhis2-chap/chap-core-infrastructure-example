@@ -41,6 +41,11 @@ sleep 10
 
 sudo lxc file push install-chap-core-inside-lxc.sh "$CONTAINER_NAME"/root/
 
+# Extra configured-model seed files, copied into chap-core's config/configured_models by the install script
+if [[ -d configs/configured_models ]]; then
+  sudo lxc file push -r configs/configured_models "$CONTAINER_NAME"/root/
+fi
+
 cat > .env <<EOF
 GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=$GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
 GOOGLE_SERVICE_ACCOUNT_EMAIL=$GOOGLE_SERVICE_ACCOUNT_EMAIL

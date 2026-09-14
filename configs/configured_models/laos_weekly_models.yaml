@@ -1,0 +1,17 @@
+# Models evaluated on the weekly Laos dataset (laos_weekly_four_years_filled).
+# Unlike default.yaml, every version listed in this file is seeded, so only pinned commits are kept.
+
+- url: https://github.com/chap-models/auto_regressive_weekly_v2
+  name: auto_regressive_weekly_v2
+  versions:
+    stable: "@55f8fa523fbf2ebd9e2f7f17358b76c66a16c2c9"
+
+- url: https://github.com/knutdrand/mstl_multistep_model
+  name: mstl_multistep_model
+  versions:
+    stable: "@c8174835a909107bd2f4a0069f4d743ea50b64a8"
+
+- url: https://github.com/chap-models/mstl_arima
+  name: mstl_arima
+  versions:
+    stable: "@6cdec6fc7c512d5795ff888383762c39c903d55d"
