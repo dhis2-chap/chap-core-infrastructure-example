@@ -5,13 +5,47 @@
   name: auto_regressive_weekly_v2
   versions:
     stable: "@55f8fa523fbf2ebd9e2f7f17358b76c66a16c2c9"
+  configurations:
+    laos_weekly:
+      user_option_values:
+        n_ensemble: 1
+        n_iter: 1000
+        context_length: 52
+        prediction_length: 12
+        learning_rate: 0.00001
 
 - url: https://github.com/knutdrand/mstl_multistep_model
   name: mstl_multistep_model
   versions:
     stable: "@c8174835a909107bd2f4a0069f4d743ea50b64a8"
+  configurations:
+    laos_weekly:
+      user_option_values:
+        target_variable: disease_cases
+        treat_missing_as_zero: true
+        season_length_weekly: 52
+        n_samples: 100
+        feature_min_lag: 1
+        feature_max_lag: 3
+        rf_target_lags: 3
+        arima_level: 68
+        arima_order: [0, 1, 2]
+        residual_variance: tree
+        residual_variance_scale: 0.5
+      additional_continuous_covariates:
+        - mean_temperature
+        - rainfall
 
 - url: https://github.com/chap-models/mstl_arima
   name: mstl_arima
   versions:
     stable: "@6cdec6fc7c512d5795ff888383762c39c903d55d"
+  configurations:
+    laos_weekly:
+      user_option_values:
+        n_samples: 100
+        log_transform: true
+        season_length_weekly: 52
+        random_seed: 42
+        arima_approximation: false
+        arima_stepwise: true
