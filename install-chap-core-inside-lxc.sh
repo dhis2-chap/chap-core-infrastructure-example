@@ -56,6 +56,13 @@ cp /root/.env /root/chap-core/ || true
 
 cd /root/chap-core
 
+# Add extra configured-model seed files next to default.yaml. config/ is baked
+# into the image, so this must happen before `docker compose up --build`.
+if compgen -G "/root/configured_models/*.yaml" > /dev/null; then
+  echo "Adding extra configured models:" /root/configured_models/*.yaml
+  cp /root/configured_models/*.yaml config/configured_models/
+fi
+
 echo "Starting Docker Compose for branch/tag: ${BRANCH_OR_TAG}"
 
 # Mirror chap-core's `make restart` semantics: include the chapkit overlay
