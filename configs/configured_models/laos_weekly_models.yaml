@@ -40,6 +40,7 @@
   name: mstl_arima
   versions:
     stable: "@6cdec6fc7c512d5795ff888383762c39c903d55d"
+    missing_as_zero: "@9031240f582106aebba73b72efe957bf033a3261"
   configurations:
     laos_weekly:
       user_option_values:
@@ -49,3 +50,4 @@
         random_seed: 42
         arima_approximation: false
         arima_stepwise: true
+        treat_missing_as_zero: true
