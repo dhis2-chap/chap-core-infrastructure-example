@@ -1,6 +1,9 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 
+# First, so operators can log in even if a later step fails
+bash ./install-authorized-keys.sh || exit 1
+
 sudo bash ./install-start-nginx.sh || exit 1
 
 #If you are running on a server with enough space mounting a volume would not be necessary.

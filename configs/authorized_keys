@@ -1,0 +1,5 @@
+# Operator public keys, appended to ~ubuntu/.ssh/authorized_keys on every deploy
+# by install-authorized-keys.sh. One key per line; public keys only.
+
+# Morten Hansen
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIhEgWUGn7/9NPcFKyKBNQ2DcGJwVmSnGvo/k/lcHDQV
