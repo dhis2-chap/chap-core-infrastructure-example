@@ -46,6 +46,11 @@ if [[ -d configs/configured_models ]]; then
   sudo lxc file push -r configs/configured_models "$CONTAINER_NAME"/root/
 fi
 
+# Database seed (a dump of stable), restored by the install script before chap first starts
+if [[ -f seed/chap-stable.sql.gz ]]; then
+  sudo lxc file push seed/chap-stable.sql.gz "$CONTAINER_NAME"/root/
+fi
+
 cat > .env <<EOF
 GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=$GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
 GOOGLE_SERVICE_ACCOUNT_EMAIL=$GOOGLE_SERVICE_ACCOUNT_EMAIL
