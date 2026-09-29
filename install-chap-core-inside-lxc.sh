@@ -74,6 +74,19 @@ if [[ -f compose.chapkit.yml ]]; then
   echo "chapkit overlay detected; including compose.chapkit.yml"
 fi
 
+# Restore the seed dump into the still-empty database before chap first
+# starts, so chap's startup migrations (alembic upgrade head) bring it to this
+# checkout's schema. ON_ERROR_STOP makes a bad restore fail the deploy instead
+# of leaving a partial database.
+SEED_DUMP=/root/chap-stable.sql.gz
+if [[ -f "$SEED_DUMP" ]]; then
+  echo "Restoring database seed from $SEED_DUMP"
+  docker compose "${COMPOSE_FILES[@]}" up -d --wait postgres
+  gunzip -c "$SEED_DUMP" \
+    | docker compose "${COMPOSE_FILES[@]}" exec -T postgres \
+        sh -c 'psql -q -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' > /dev/null
+fi
+
 docker compose "${COMPOSE_FILES[@]}" up -d --build --remove-orphans
 
 docker compose logs --tail=200

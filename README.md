@@ -12,6 +12,25 @@ Server documentation could be found at: [https://dhis2-chap.github.io/chap-core/
 - [GitHub action](.github/workflows/deploy_nrec.yml)
 - [Deployment](./init.sh)
 
+### Database seed
+
+Every deploy rebuilds the server, which deletes both databases. To keep the demo
+content, [`seed/chap-stable.sql.gz`](./seed/chap-stable.sql.gz) (a plain `pg_dump`
+of the stable instance) is restored into both `stable` and `master` before chap
+first starts. Chap's startup migrations then bring it to each checkout's schema.
+Anything added on the servers after the dump is lost at the next deploy unless the
+seed is refreshed.
+
+To refresh it from the running stable instance:
+
+```bash
+ssh ubuntu@<host> "lxc exec chap-core-stable -- docker exec chap-core-postgres-1 \
+  sh -c 'pg_dump -U \"\$POSTGRES_USER\" \"\$POSTGRES_DB\"'" | gzip -9n > seed/chap-stable.sql.gz
+gunzip -c seed/chap-stable.sql.gz | tail -4    # must end with "dump complete"
+```
+
+This repository is public, so the seed must only ever hold demo data.
+
 ### Overview of CHAP architecture:
 
 ![CHAP_with_routes_without_climate_data_store drawio (2)](./documentation/chap_core_routes.png)
