@@ -49,7 +49,9 @@ jobs:
           export OS_INTERFACE=public
           export OS_NO_CACHE=1
   
-          openstack server rebuild --wait --image "GOLD Ubuntu 24.04 LTS" chap
+          # By ID, not name: the instance was renamed chap -> chap-core on
+          # 2026-09-30, and a name lookup breaks on every rename.
+          openstack server rebuild --wait --image "GOLD Ubuntu 24.04 LTS" 115c62dc-1da9-463c-bded-616510bd2c18
         shell: bash
 
   deployChap:
